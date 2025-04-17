@@ -1,0 +1,15 @@
+name: holdings_lib
+publish_to: none
+resolution: workspace
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  dart2js_info:
+    path: /Users/kevmoo/github/dart/sdk/pkg/dart2js_info
+  graf:
+    path: ../graf
+
+  http: ^1.3.0
+  io: ^1.0.0
+  path: ^1.9.1

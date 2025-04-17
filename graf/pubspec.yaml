@@ -1,0 +1,12 @@
+name: graf
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  graphs: ^2.3.2
+
+dev_dependencies:
+  test: ^1.25.15

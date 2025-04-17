@@ -1,0 +1,12 @@
+name: _workspace
+publish_to: none
+environment:
+  sdk: ^3.7.0
+
+workspace:
+  - graf
+  - graf_flutter
+  - holdings_lib
+
+dev_dependencies:
+  dart_flutter_team_lints: ^3.5.1
