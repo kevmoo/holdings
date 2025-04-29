@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graf/graf.dart';
 
-import 'src/graph_widget.dart';
+import 'graf_flutter.dart';
 
 void main() {
   runApp(const MyApp());
