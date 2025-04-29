@@ -28,7 +28,7 @@ class NodeFlowDelegate<T> extends FlowDelegate {
       // Paint the child (NodeWidget) at the calculated position
       context.paintChild(
         i, // The index of the child in the Flow's children list
-        transform: Matrix4.translationValues(topLeft.dx, topLeft.dy, 0.0),
+        transform: Matrix4.translationValues(topLeft.dx, topLeft.dy, 0),
       );
 
       i++;
@@ -36,7 +36,7 @@ class NodeFlowDelegate<T> extends FlowDelegate {
   }
 
   @override
-  bool shouldRepaint(covariant NodeFlowDelegate oldDelegate) =>
+  bool shouldRepaint(covariant NodeFlowDelegate<T> oldDelegate) =>
       // Repaint if node positions, size, or the nodes themselves change.
       // A deep comparison of nodePositions might be needed for accuracy,
       // but comparing identity might suffice if the map instance changes.

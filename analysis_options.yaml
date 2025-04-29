@@ -1,6 +1,50 @@
 # https://dart.dev/guides/language/analysis-options
 include: package:dart_flutter_team_lints/analysis_options.yaml
 
+
+analyzer:
+  language:
+    strict-raw-types: true
+
 linter:
   rules:
+    - avoid_annotating_with_dynamic
+    - avoid_bool_literals_in_conditional_expressions
+    - avoid_catches_without_on_clauses
+    - avoid_classes_with_only_static_members
+    - avoid_double_and_int_checks
+    - avoid_field_initializers_in_const_classes
+    - avoid_implementing_value_types
+    - avoid_js_rounded_ints
+    - avoid_private_typedef_functions
+    - avoid_redundant_argument_values
+    - avoid_returning_null
+    - avoid_returning_null_for_future
+    - avoid_returning_this
+    - avoid_setters_without_getters
+    - avoid_slow_async_io
+    - avoid_types_on_closure_parameters
+    - avoid_unused_constructor_parameters
+    - avoid_void_async
+    - cancel_subscriptions
+    - close_sinks
+    - join_return_with_assignment
+    - literal_only_boolean_expressions
+    - missing_whitespace_between_adjacent_strings
+    - no_adjacent_strings_in_list
+    - no_runtimeType_toString
+    - one_member_abstracts
+    - prefer_const_constructors_in_immutables
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
     - prefer_expression_function_bodies
+    - prefer_final_locals
+    - prefer_foreach
+    - prefer_int_literals
+    - prefer_mixin
+    - require_trailing_commas
+    - unnecessary_await_in_return
+    - unnecessary_breaks
+    - use_setters_to_change_properties
+    - use_string_buffers
+    - use_to_and_as_if_applicable

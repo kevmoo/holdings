@@ -44,7 +44,7 @@ class EdgePainter<T> extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant EdgePainter oldDelegate) =>
+  bool shouldRepaint(covariant EdgePainter<T> oldDelegate) =>
       // the values within _graphData and/or _nodePositions may have changed
       // so we're just going with true for now
       true;

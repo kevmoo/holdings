@@ -13,28 +13,29 @@ import 'node_widget.dart';
 // Define in a file like force_directed_graph_view.dart
 class ForceDirectedGraphView<T> extends StatefulWidget {
   final GraphData<T> graphData;
-  final double nodeSize; // Size to use for node widgets
-  final double springStiffness; // k in Hooke's Law
-  final double defaultSpringLength; // L0
-  final double repulsionConstant; // C
   final double damping; // Velocity damping factor (0 to 1)
-  final double timeStep; // dt for simulation (can be fixed or use frame delta)
+  final double defaultSpringLength; // L0
+  final double maxForce;
   final double minEnergyThreshold; // Stop when simulation settles (optional)
+  final double nodeSize; // Size to use for node widgets
+  final double repulsionConstant; // C
+  final double springStiffness; // k in Hooke's Law
   final double terminalVelocity;
-  final double maxForce = 100;
+  final double timeStep; // dt for simulation (can be fixed or use frame delta)
   final double tooFar; // distance at which we should ignore repulsion
 
   const ForceDirectedGraphView({
     super.key,
     required this.graphData,
-    this.nodeSize = 60,
-    this.springStiffness = 0.05,
-    this.defaultSpringLength = 10,
-    this.repulsionConstant = 10000, // Adjust based on scale
     this.damping = 0.99,
-    this.timeStep = 0.016, // Roughly 1/60 seconds, good starting point
+    this.defaultSpringLength = 10,
+    this.maxForce = 100,
     this.minEnergyThreshold = 0.1, // Stop when avg velocity is low
+    this.nodeSize = 60,
+    this.repulsionConstant = 10000, // Adjust based on scale
+    this.springStiffness = 0.05,
     this.terminalVelocity = 300,
+    this.timeStep = 0.016, // Roughly 1/60 seconds, good starting point
     this.tooFar = 50000, // distance at which we should ignore repulsion
   });
 

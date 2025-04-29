@@ -78,7 +78,7 @@ MERGE (startNode)-[:$kind]->(endNode)''',
     });
   }
 
-  Future<List> _query(Object? queryBody) async {
+  Future<List<Object?>> _query(Object? queryBody) async {
     final request = await _client.postUrl(
       Uri.parse('http://localhost:7474/db/neo4j/tx/commit'),
     );
