@@ -27,14 +27,14 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
   const ForceDirectedGraphView({
     super.key,
     required this.graphData,
-    this.damping = 0.99,
+    this.damping = 0.999,
     this.defaultSpringLength = 10,
-    this.maxForce = 100,
+    this.maxForce = 1000,
     this.minEnergyThreshold = 0.1, // Stop when avg velocity is low
     this.nodeSize = 60,
-    this.repulsionConstant = 10000, // Adjust based on scale
-    this.springStiffness = 0.05,
-    this.terminalVelocity = 300,
+    this.repulsionConstant = 19000, // Adjust based on scale
+    this.springStiffness = 0.08,
+    this.terminalVelocity = 1000,
     this.timeStep = 0.016, // Roughly 1/60 seconds, good starting point
     this.tooFar = 50000, // distance at which we should ignore repulsion
   });

@@ -7,7 +7,7 @@ void main() {
   runApp(const MyApp());
 }
 
-final _data = GraphData.tree(count: 63);
+final _data = GraphData.randomRing(count: 63);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
