@@ -39,7 +39,7 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
   });
 
   @override
-  State<ForceDirectedGraphView> createState() =>
+  State<ForceDirectedGraphView<T>> createState() =>
       _ForceDirectedGraphViewState<T>();
 }
 
