@@ -23,6 +23,7 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
   final double terminalVelocity;
   final double timeStep; // dt for simulation (can be fixed or use frame delta)
   final double tooFar; // distance at which we should ignore repulsion
+  final double centerForce;
 
   const ForceDirectedGraphView({
     super.key,
@@ -37,6 +38,7 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
     this.terminalVelocity = 1000,
     this.timeStep = 0.016, // Roughly 1/60 seconds, good starting point
     this.tooFar = 50000, // distance at which we should ignore repulsion
+    this.centerForce = 0.01,
   });
 
   @override
@@ -61,7 +63,6 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
 
   bool _isSettled = false; // Flag to indicate simulation has settled
 
-  // --- initState, dispose, _onTick remain the same ---
   @override
   void initState() {
     super.initState();
@@ -203,8 +204,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
       //
       // Add a tiny force towards the center
       //
-      // TODO: make this configurable!
-      force -= pos * 0.001;
+      force -= pos * widget.centerForce;
 
       var velocity = _nodeVelocities[nodeId]!; // Get current velocity
 
