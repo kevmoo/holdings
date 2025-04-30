@@ -1,5 +1,6 @@
 // ignore_for_file: lines_longer_than_80_chars
 
+import 'dart:collection';
 import 'dart:math'; // Needed for sqrt, pow, Random
 
 import 'package:flutter/material.dart';
@@ -29,7 +30,7 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
     super.key,
     required this.graphData,
     this.centerForce = 0.015,
-    this.damping = 0.999,
+    this.damping = 0.99,
     this.defaultSpringLength = 10,
     this.maxForce = 1000,
     this.minEnergyThreshold = 0.1, // Stop when avg velocity is low
@@ -48,7 +49,7 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
 
 // Add TickerProviderStateMixin to manage the Ticker
 class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   final GlobalKey _sizeKey = GlobalKey(debugLabel: 'size key');
   static final _random = Random();
 
@@ -57,9 +58,9 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
   final _notifier = ValueNotifier<int>(0);
 
   // Physics state maps (Node ID -> Value)
-  final _nodePositions = <T, Offset>{};
-  final _nodeVelocities = <T, Offset>{};
-  final _nodeForces = <T, Offset>{}; // Force accumulated this step
+  final _nodePositions = HashMap<T, Offset>();
+  final _nodeVelocities = HashMap<T, Offset>();
+  final _nodeForces = HashMap<T, Offset>(); // Force accumulated this step
 
   bool _isSettled = false; // Flag to indicate simulation has settled
 

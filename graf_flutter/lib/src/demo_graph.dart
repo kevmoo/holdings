@@ -13,26 +13,30 @@ final _rnd = Random();
 const _maxDelta = 3;
 const _maxTries = 100;
 
+const _edgeStuff = false;
+
 class DemoGraph implements GraphData<int>, Listenable {
   DemoGraph({int targetCount = 20}) {
     this.targetCount = targetCount;
     for (var i = 0; i < targetCount; i++) {
-      _map[i] = HashSet<int>.identity();
+      _map[i] = HashSet<int>();
     }
 
-    for (var i = 0; i < (targetCount - 1); i++) {
-      var added = false;
-      do {
-        final a = _rnd.nextInt(targetCount);
-        final b = _rnd.nextInt(targetCount);
-        added = a != b && !_map[b]!.contains(a) && _map[a]!.add(b);
-      } while (!added);
-    }
+    if (_edgeStuff) {
+      for (var i = 0; i < (targetCount - 1); i++) {
+        var added = false;
+        do {
+          final a = _rnd.nextInt(targetCount);
+          final b = _rnd.nextInt(targetCount);
+          added = a != b && !_map[b]!.contains(a) && _map[a]!.add(b);
+        } while (!added);
+      }
 
-    assert(edges.length == (targetCount - 1));
+      assert(edges.length == (targetCount - 1));
+    }
   }
 
-  final Map<int, Set<int>> _map = HashMap.identity();
+  final Map<int, Set<int>> _map = HashMap<int, Set<int>>();
 
   late int _targetCount;
   int get targetCount => _targetCount;
@@ -44,6 +48,8 @@ class DemoGraph implements GraphData<int>, Listenable {
   }
 
   final _notifier = _MyNotifier();
+
+  int get size => _map.length;
 
   DemoGraphDeltaOption churn() {
     final edgeCount = edges.length;
@@ -62,7 +68,8 @@ class DemoGraph implements GraphData<int>, Listenable {
       );
     }
 
-    if (edgeDelta > -_maxDelta &&
+    if (_edgeStuff &&
+        edgeDelta > -_maxDelta &&
         _map.length > 1 &&
         edgeCount < (_targetCount - 1)) {
       // we can add edges – but no more than _maxDelta
@@ -84,7 +91,7 @@ class DemoGraph implements GraphData<int>, Listenable {
       );
     }
 
-    if (edgeDelta < _maxDelta && edgeCount > 0) {
+    if (_edgeStuff && edgeDelta < _maxDelta && edgeCount > 0) {
       // we can remove edges!
       churnOptions.addAll(
         Iterable.generate(
@@ -95,7 +102,7 @@ class DemoGraph implements GraphData<int>, Listenable {
     }
 
     if (churnOptions.isEmpty) {
-      print('noop for now!');
+      //print('noop for now!');
       return DemoGraphDeltaOption.removeNode;
     }
 
@@ -103,7 +110,7 @@ class DemoGraph implements GraphData<int>, Listenable {
 
     final option = churnOptions[_rnd.nextInt(churnOptions.length)];
 
-    print('picked $option from $churnOptions');
+    //print('picked $option from $churnOptions');
 
     switch (option) {
       case DemoGraphDeltaOption.addNode:
@@ -129,9 +136,9 @@ class DemoGraph implements GraphData<int>, Listenable {
     }
     assert(newNode != -1);
 
-    _map[newNode] = HashSet<int>.identity();
+    _map[newNode] = HashSet<int>();
 
-    print('added $newNode');
+    //print('added $newNode');
     _notifier._notify();
   }
 
@@ -150,7 +157,7 @@ class DemoGraph implements GraphData<int>, Listenable {
       }
     }
 
-    print('removed $key with $removeCount edges');
+    //print('removed $key with $removeCount edges');
     _notifier._notify();
   }
 
@@ -192,7 +199,8 @@ class DemoGraph implements GraphData<int>, Listenable {
       if (removed) {
         print('removed edge: $a -> $b');
       } else if (count > _maxTries) {
-        throw StateError('could not an edge to remove after $_maxTries tries');
+        print('could not an edge to remove after $_maxTries tries');
+        return;
       }
     } while (!removed);
   }
