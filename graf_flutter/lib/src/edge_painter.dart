@@ -3,9 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:graf/graf.dart';
 
+import 'node_data.dart';
+
 class EdgePainter<T> extends CustomPainter {
   final GraphData<T> _graphData;
-  final Map<T, Offset> _nodePositions;
+  final Map<T, NodeData> _nodePositions;
 
   EdgePainter(this._graphData, this._nodePositions);
 
@@ -22,7 +24,7 @@ class EdgePainter<T> extends CustomPainter {
         bounds,
         pos,
       ) {
-        final posRect = pos & Size.zero;
+        final posRect = pos.position & Size.zero;
         if (bounds.isInfinite) {
           return posRect;
         }
@@ -32,8 +34,8 @@ class EdgePainter<T> extends CustomPainter {
     }
 
     for (var edge in _graphData.edges) {
-      final startPos = _nodePositions[edge.from];
-      final endPos = _nodePositions[edge.to];
+      final startPos = _nodePositions[edge.from]?.position;
+      final endPos = _nodePositions[edge.to]?.position;
 
       if (startPos != null && endPos != null) {
         canvas.drawLine(startPos, endPos, _edgePaint);

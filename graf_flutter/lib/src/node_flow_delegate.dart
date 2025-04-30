@@ -3,15 +3,17 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'node_data.dart';
+
 class NodeFlowDelegate<T> extends FlowDelegate {
-  final Iterable<Offset> _nodePositions;
+  final Iterable<NodeData> _nodeData;
   final double nodeSize;
 
   NodeFlowDelegate({
-    required Iterable<Offset> nodePositions,
+    required Iterable<NodeData> nodePositions,
     required this.nodeSize,
     required Listenable repaint,
-  }) : _nodePositions = nodePositions,
+  }) : _nodeData = nodePositions,
        super(repaint: repaint);
 
   @override
@@ -19,11 +21,11 @@ class NodeFlowDelegate<T> extends FlowDelegate {
     final centerOffset = context.size.center(Offset.zero);
 
     var i = 0;
-    for (var position in _nodePositions) {
+    for (var data in _nodeData) {
       // Flow paints children from their top-left corner.
       // Convert center position from simulation to top-left.
       final topLeft =
-          centerOffset + position - Offset(nodeSize / 2, nodeSize / 2);
+          centerOffset + data.position - Offset(nodeSize / 2, nodeSize / 2);
 
       // Paint the child (NodeWidget) at the calculated position
       context.paintChild(
@@ -42,6 +44,5 @@ class NodeFlowDelegate<T> extends FlowDelegate {
       // but comparing identity might suffice if the map instance changes.
       // For simplicity here, we'll compare references and nodeSize.
       // The Listenable approach in the constructor handles position changes.
-      oldDelegate._nodePositions != _nodePositions ||
-      oldDelegate.nodeSize != nodeSize; // Reference check for nodes list
+      oldDelegate._nodeData != _nodeData || oldDelegate.nodeSize != nodeSize; // Reference check for nodes list
 }

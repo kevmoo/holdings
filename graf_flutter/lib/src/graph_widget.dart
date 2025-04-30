@@ -8,6 +8,7 @@ import 'package:flutter/scheduler.dart'; // Needed for Ticker and SchedulerBindi
 import 'package:graf/graf.dart';
 
 import 'edge_painter.dart';
+import 'node_data.dart';
 import 'node_flow_delegate.dart';
 import 'node_widget.dart';
 
@@ -57,10 +58,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
   Duration _lastTickTime = Duration.zero;
   final _notifier = ValueNotifier<int>(0);
 
-  // Physics state maps (Node ID -> Value)
-  final _nodePositions = HashMap<T, Offset>();
-  final _nodeVelocities = HashMap<T, Offset>();
-  final _nodeForces = HashMap<T, Offset>(); // Force accumulated this step
+  final _nodeData = HashMap<T, NodeData>();
 
   bool _isSettled = false; // Flag to indicate simulation has settled
 
@@ -96,17 +94,15 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
   void _ensureNodeData() {
     // Initialize positions randomly within a plausible area
 
-    _nodePositions.removeWhere((e, _) => !widget.graphData.nodes.contains(e));
-    _nodeVelocities.removeWhere((e, _) => !widget.graphData.nodes.contains(e));
-    _nodeForces.removeWhere((e, _) => !widget.graphData.nodes.contains(e));
+    _nodeData.removeWhere((e, _) => !widget.graphData.nodes.contains(e));
 
     for (var node in widget.graphData.nodes) {
-      _nodePositions[node] ??= Offset(
-        _random.nextDouble() * 200 - 100, // e.g., x from 50 to 250
-        _random.nextDouble() * 200 - 100, // e.g., y from 50 to 250
+      _nodeData[node] ??= NodeData(
+        position: Offset(
+          _random.nextDouble() * 200 - 100, // e.g., x from 50 to 250
+          _random.nextDouble() * 200 - 100, // e.g., y from 50 to 250
+        ),
       );
-      _nodeVelocities[node] ??= Offset.zero;
-      _nodeForces[node] ??= Offset.zero;
     }
   }
 
@@ -146,16 +142,18 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
     // --- Physics Simulation Step ---
 
     // 1. Clear forces
-    _nodeForces.updateAll((key, value) => Offset.zero);
+    for (var e in _nodeData.values) {
+      e.force = Offset.zero;
+    }
 
-    final nodeIds = _nodePositions.keys.toList();
+    final nodeIds = _nodeData.keys.toList();
     for (var i = 0; i < nodeIds.length; i++) {
       final nodeId1 = nodeIds[i];
-      final pos1 = _nodePositions[nodeId1]!;
+      final pos1 = _nodeData[nodeId1]!.position;
 
       for (var j = i + 1; j < nodeIds.length; j++) {
         final nodeId2 = nodeIds[j];
-        final pos2 = _nodePositions[nodeId2]!;
+        final pos2 = _nodeData[nodeId2]!.position;
 
         final delta = pos2 - pos1; // Vector from pos1 to pos2
         final distanceSquared = delta.distanceSquared;
@@ -175,8 +173,8 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               setState(() {
-                _nodePositions[nodeId1] = newPos1;
-                _nodePositions[nodeId2] = newPos2;
+                _nodeData[nodeId1]!.position = newPos1;
+                _nodeData[nodeId2]!.position = newPos2;
               });
             }
           });
@@ -210,29 +208,27 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
 
         final force = direction * forceMagnitude;
         // Apply forces using temporary variables or directly if safe
-        _nodeForces[nodeId1] = _nodeForces[nodeId1]! + force;
-        _nodeForces[nodeId2] = _nodeForces[nodeId2]! - force;
+        _nodeData[nodeId1]!.force += force;
+        _nodeData[nodeId2]!.force -= force;
       }
 
-      _nodeForces[nodeId1] = _limitMagnitude(
-        _nodeForces[nodeId1]!,
-        widget.maxForce,
-      );
+      final data = _nodeData[nodeId1]!;
+
+      data.force = _limitMagnitude(data.force, widget.maxForce);
     }
 
     // 4. Update Velocities and Positions (Euler Integration) - O(N)
     double totalVelocityMagnitudeSquared = 0;
-    final nextPositions = <T, Offset>{}; // Store next positions
 
-    _nodePositions.forEach((nodeId, pos) {
-      var force = _nodeForces[nodeId]!;
+    _nodeData.forEach((nodeId, data) {
+      var force = data.force;
 
       //
       // Add a tiny force towards the center
       //
-      force -= pos * widget.centerForce;
+      force -= data.position * widget.centerForce;
 
-      var velocity = _nodeVelocities[nodeId]!; // Get current velocity
+      var velocity = data.velocity; // Get current velocity
 
       // Update velocity: v = v + a * dt
       velocity = velocity + force * dt;
@@ -243,17 +239,14 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
       velocity = _limitMagnitude(velocity, widget.terminalVelocity);
 
       // Update position: p = p + v * dt
-      final newPosition = pos + velocity * dt;
+      final newPosition = data.position + velocity * dt;
 
-      _nodeVelocities[nodeId] = velocity; // Store updated velocity
-      nextPositions[nodeId] = newPosition; // Store next position
+      data.velocity = velocity; // Store updated velocity
+      data.position = newPosition; // Store next position
 
       totalVelocityMagnitudeSquared +=
           velocity.distanceSquared; // Sum squared velocities
     });
-
-    // Update all positions at once after calculations
-    _nodePositions.addAll(nextPositions);
 
     // 5. Check for Settling (Optional)
     // Calculate average velocity magnitude squared
@@ -288,7 +281,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
       // 1. Edge Painter - draws lines between current node positions
       Positioned.fill(
         child: CustomPaint(
-          painter: EdgePainter<T>(widget.graphData, _nodePositions),
+          painter: EdgePainter<T>(widget.graphData, _nodeData),
           willChange: true,
           // Ensure the painter repaints when positions change
           // isComplex/willChange might be useful if edges are numerous
@@ -299,21 +292,21 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
       Flow(
         delegate: NodeFlowDelegate<T>(
           repaint: _notifier,
-          nodePositions: _nodePositions.values,
+          nodePositions: _nodeData.values,
           nodeSize: widget.nodeSize,
         ),
         // Provide the NodeWidgets as direct children
-        children: _nodePositions.keys
+        children: _nodeData.keys
             .map(
               (node) => GestureDetector(
                 child: NodeWidget<T>(node: node, size: widget.nodeSize),
                 onPanUpdate: (details) {
                   if (mounted) {
                     setState(() {
-                      _nodePositions[node] =
-                          _nodePositions[node]! + details.delta;
+                      final nodeData = _nodeData[node]!;
+                      nodeData.position += details.delta;
                       // Optionally pause forces on this node while dragging
-                      _nodeVelocities[node] = Offset.zero;
+                      nodeData.velocity = Offset.zero;
                       _isSettled = false; // Unsettle if dragged
                       if (!_ticker.isActive) {
                         _ticker.start();
