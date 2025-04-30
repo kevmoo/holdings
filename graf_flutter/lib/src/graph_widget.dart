@@ -13,6 +13,7 @@ import 'node_widget.dart';
 // Define in a file like force_directed_graph_view.dart
 class ForceDirectedGraphView<T> extends StatefulWidget {
   final GraphData<T> graphData;
+  final double centerForce;
   final double damping; // Velocity damping factor (0 to 1)
   final double defaultSpringLength; // L0
   final double maxForce;
@@ -23,7 +24,6 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
   final double terminalVelocity;
   final double timeStep; // dt for simulation (can be fixed or use frame delta)
   final double tooFar; // distance at which we should ignore repulsion
-  final double centerForce;
 
   const ForceDirectedGraphView({
     super.key,
@@ -89,6 +89,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
     }
 
     _ensureNodeData();
+    _isSettled = false;
   }
 
   void _ensureNodeData() {
