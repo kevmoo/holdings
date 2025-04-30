@@ -28,17 +28,17 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
   const ForceDirectedGraphView({
     super.key,
     required this.graphData,
+    this.centerForce = 0.015,
     this.damping = 0.999,
     this.defaultSpringLength = 10,
     this.maxForce = 1000,
     this.minEnergyThreshold = 0.1, // Stop when avg velocity is low
     this.nodeSize = 60,
-    this.repulsionConstant = 19000, // Adjust based on scale
-    this.springStiffness = 0.08,
+    this.repulsionConstant = 20000, // Adjust based on scale
+    this.springStiffness = 0.05,
     this.terminalVelocity = 1000,
     this.timeStep = 0.016, // Roughly 1/60 seconds, good starting point
     this.tooFar = 50000, // distance at which we should ignore repulsion
-    this.centerForce = 0.01,
   });
 
   @override
@@ -67,25 +67,45 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
   void initState() {
     super.initState();
 
-    // Initialize positions randomly within a plausible area
-    for (var node in widget.graphData.nodes) {
-      _nodePositions[node] = Offset(
-        _random.nextDouble() * 200 - 100, // e.g., x from 50 to 250
-        _random.nextDouble() * 200 - 100, // e.g., y from 50 to 250
-      );
-      _nodeVelocities[node] = Offset.zero;
-      _nodeForces[node] = Offset.zero;
-    }
-
+    _ensureNodeData();
     // Create and start the ticker
     _ticker = createTicker(_onTick);
     _ticker.start();
+
+    if (widget.graphData is Listenable) {
+      (widget.graphData as Listenable).addListener(_onGraphDataChanged);
+    }
   }
 
   @override
   void dispose() {
     _ticker.dispose(); // Stop and dispose the ticker when the widget is removed
     super.dispose();
+  }
+
+  void _onGraphDataChanged() {
+    if (!_ticker.isActive) {
+      _ticker.start();
+    }
+
+    _ensureNodeData();
+  }
+
+  void _ensureNodeData() {
+    // Initialize positions randomly within a plausible area
+
+    _nodePositions.removeWhere((e, _) => !widget.graphData.nodes.contains(e));
+    _nodeVelocities.removeWhere((e, _) => !widget.graphData.nodes.contains(e));
+    _nodeForces.removeWhere((e, _) => !widget.graphData.nodes.contains(e));
+
+    for (var node in widget.graphData.nodes) {
+      _nodePositions[node] ??= Offset(
+        _random.nextDouble() * 200 - 100, // e.g., x from 50 to 250
+        _random.nextDouble() * 200 - 100, // e.g., y from 50 to 250
+      );
+      _nodeVelocities[node] ??= Offset.zero;
+      _nodeForces[node] ??= Offset.zero;
+    }
   }
 
   // The callback function for the ticker
@@ -107,7 +127,11 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
     // Calculate delta time in seconds, ensure it's positive
     final dt = max(
       widget.timeStep, // Use a minimum timestep
-      (elapsed - _lastTickTime).inMicroseconds / 1000000.0,
+      min(
+        (elapsed - _lastTickTime).inMicroseconds / 1000000.0,
+        // No more than 3x the timeStep
+        widget.timeStep * 3,
+      ),
     );
     _lastTickTime = elapsed;
 
