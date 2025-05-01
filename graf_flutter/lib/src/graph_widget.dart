@@ -11,6 +11,7 @@ import 'edge_painter.dart';
 import 'node_data.dart';
 import 'node_flow_delegate.dart';
 import 'node_widget.dart';
+import 'utilities.dart';
 
 // Define in a file like force_directed_graph_view.dart
 class ForceDirectedGraphView<T> extends StatefulWidget {
@@ -30,7 +31,7 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
   const ForceDirectedGraphView({
     super.key,
     required this.graphData,
-    this.centerForce = 0.015,
+    this.centerForce = 0,
     this.damping = 0.99,
     this.defaultSpringLength = 10,
     this.maxForce = 1000,
@@ -210,6 +211,16 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
       // Add a tiny force towards the center
       //
       force -= data.position * widget.centerForce;
+
+      //
+      // Wall forces
+      //
+      force += wallForce(
+        position: data.position,
+        size: _renderSize,
+        buffer: widget.nodeSize * 2,
+        maxForce: 100,
+      );
 
       var velocity = data.velocity; // Get current velocity
 
