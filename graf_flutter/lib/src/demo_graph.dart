@@ -152,14 +152,16 @@ class DemoGraph implements GraphData<int>, Listenable {
     final key = _randomNode();
     _map.remove(key);
 
-    var removeCount = 0;
-    for (var e in _map.values) {
-      if (_edgeStuff && e.remove(key)) {
-        removeCount++;
+    if (_edgeStuff) {
+      var removeCount = 0;
+      for (var e in _map.values) {
+        if (_edgeStuff && e.remove(key)) {
+          removeCount++;
+        }
       }
-    }
 
-    //print('removed $key with $removeCount edges');
+      print('removed $key with $removeCount edges');
+    }
     _notifier._notify();
   }
 

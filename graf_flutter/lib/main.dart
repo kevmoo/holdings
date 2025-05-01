@@ -36,7 +36,9 @@ class MyApp extends StatelessWidget {
     home: Scaffold(
       body: Column(
         children: [
-          Expanded(child: ForceDirectedGraphView<int>(graphData: _data)),
+          Expanded(
+            child: ForceDirectedGraphView<int>(graphData: _data, nodeSize: 40),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [

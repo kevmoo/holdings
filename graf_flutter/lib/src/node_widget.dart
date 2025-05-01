@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+const _doText = false;
+
 class NodeWidget<T> extends StatelessWidget {
   final T node;
   final double size;
@@ -23,14 +25,16 @@ class NodeWidget<T> extends StatelessWidget {
       ],
     ),
     child: Center(
-      child: Text(
-        node.toString(),
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: size * 0.2, // Adjust font size relative to node size
-        ),
-        overflow: TextOverflow.ellipsis, // Prevent text overflow
-      ),
+      child: _doText
+          ? Text(
+              node.toString(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: size * 0.2, // Adjust font size relative to node size
+              ),
+              overflow: TextOverflow.ellipsis, // Prevent text overflow
+            )
+          : const Icon(Icons.flag),
     ),
   );
 }
