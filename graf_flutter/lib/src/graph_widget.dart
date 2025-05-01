@@ -60,6 +60,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
 
   final _nodeData = HashMap<T, NodeData>();
   final _nodeList = <T>[];
+  Size _renderSize = const Size(500, 500);
 
   bool _isSettled = false; // Flag to indicate simulation has settled
 
@@ -100,8 +101,8 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
     for (var node in widget.graphData.nodes) {
       _nodeData[node] ??= NodeData(
         position: Offset(
-          _random.nextDouble() * 200 - 100,
-          _random.nextDouble() * 200 - 100,
+          _random.nextDouble() * _renderSize.width - _renderSize.width / 2,
+          _random.nextDouble() * _renderSize.height - _renderSize.height / 2,
         ),
       );
     }
@@ -134,11 +135,8 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
     );
     _lastTickTime = elapsed;
 
-    /*
-    final renderSize =
+    _renderSize =
         (_sizeKey.currentContext!.findRenderObject() as RenderBox).size;
-
-     */
 
     // --- Physics Simulation Step ---
 
