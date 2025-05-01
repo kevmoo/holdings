@@ -198,7 +198,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
         data2.force -= force;
       }
 
-      data1.force = _limitMagnitude(data1.force, widget.maxForce);
+      data1.force = limitMagnitude(data1.force, widget.maxForce);
     }
 
     // 4. Update Velocities and Positions (Euler Integration) - O(N)
@@ -230,7 +230,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
       // Apply damping
       velocity = velocity * widget.damping;
 
-      velocity = _limitMagnitude(velocity, widget.terminalVelocity);
+      velocity = limitMagnitude(velocity, widget.terminalVelocity);
 
       // Update position: p = p + v * dt
       final newPosition = data.position + velocity * dt;
@@ -293,7 +293,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
         children: _nodeData.keys
             .map(
               (node) => GestureDetector(
-                child: NodeWidget<T>(node: node, size: widget.nodeSize),
+                child: IconWidget(size: widget.nodeSize),
                 onPanUpdate: (details) {
                   if (mounted) {
                     setState(() {
@@ -314,11 +314,4 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
       ),
     ],
   );
-}
-
-Offset _limitMagnitude(Offset velocity, double maxMagnitude) {
-  if (velocity.distanceSquared > maxMagnitude * maxMagnitude) {
-    velocity *= maxMagnitude / velocity.distance;
-  }
-  return velocity;
 }

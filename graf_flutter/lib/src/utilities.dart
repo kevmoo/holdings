@@ -19,13 +19,15 @@ Offset wallForce({
   assert(value.dx <= maxForce);
   assert(value.dy <= maxForce);
 
-  final distance = value.distance;
+  return limitMagnitude(value, maxForce);
+}
 
-  if (distance > maxForce) {
-    final scaleDown = maxForce / distance;
-    return value * scaleDown;
+Offset limitMagnitude(Offset velocity, double maxMagnitude) {
+  final distance = velocity.distance;
+  if (distance > maxMagnitude) {
+    velocity *= maxMagnitude / velocity.distance;
   }
-  return value;
+  return velocity;
 }
 
 @visibleForTesting
