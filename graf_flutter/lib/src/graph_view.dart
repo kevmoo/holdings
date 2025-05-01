@@ -66,6 +66,9 @@ class GraphView<T> implements Listenable, GraphData<T> {
 
   @override
   Iterable<T> get nodes => _visible;
+
+  @override
+  bool hasNode(T node) => _visible.contains(node);
 }
 
 // Avoiding the lint about calling `notifyListeners` being protected/test only.

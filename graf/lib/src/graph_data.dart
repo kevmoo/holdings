@@ -3,6 +3,7 @@ import 'dart:collection';
 abstract class GraphData<T> {
   Iterable<T> get nodes;
   Iterable<T> edgesFrom(T node);
+  bool hasNode(T node);
 
   factory GraphData(Map<T, Set<T>> values) = _GraphData;
 
@@ -74,4 +75,7 @@ class _GraphData<T> implements GraphData<T> {
 
   @override
   Iterable<T> edgesFrom(T node) => _map[node]!;
+
+  @override
+  bool hasNode(T node) => _map.containsKey(node);
 }

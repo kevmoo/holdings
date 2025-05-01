@@ -59,6 +59,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
   final _notifier = ValueNotifier<int>(0);
 
   final _nodeData = HashMap<T, NodeData>();
+  final _nodeList = <T>[];
 
   bool _isSettled = false; // Flag to indicate simulation has settled
 
@@ -94,13 +95,13 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
   void _ensureNodeData() {
     // Initialize positions randomly within a plausible area
 
-    _nodeData.removeWhere((e, _) => !widget.graphData.nodes.contains(e));
+    _nodeData.removeWhere((e, _) => !widget.graphData.hasNode(e));
 
     for (var node in widget.graphData.nodes) {
       _nodeData[node] ??= NodeData(
         position: Offset(
-          _random.nextDouble() * 200 - 100, // e.g., x from 50 to 250
-          _random.nextDouble() * 200 - 100, // e.g., y from 50 to 250
+          _random.nextDouble() * 200 - 100,
+          _random.nextDouble() * 200 - 100,
         ),
       );
     }
@@ -146,38 +147,24 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
       e.force = Offset.zero;
     }
 
-    final nodeIds = _nodeData.keys.toList();
-    for (var i = 0; i < nodeIds.length; i++) {
-      final nodeId1 = nodeIds[i];
-      final pos1 = _nodeData[nodeId1]!.position;
+    _nodeList.clear();
+    _nodeList.addAll(_nodeData.keys);
+    for (var i = 0; i < _nodeList.length; i++) {
+      final node1 = _nodeList[i];
+      final data1 = _nodeData[node1]!;
+      final pos1 = data1.position;
 
-      for (var j = i + 1; j < nodeIds.length; j++) {
-        final nodeId2 = nodeIds[j];
-        final pos2 = _nodeData[nodeId2]!.position;
+      for (var j = i + 1; j < _nodeList.length; j++) {
+        final node2 = _nodeList[j];
+        final data2 = _nodeData[node2]!;
+        final pos2 = data2.position;
 
         final delta = pos2 - pos1; // Vector from pos1 to pos2
         final distanceSquared = delta.distanceSquared;
         final distance = sqrt(distanceSquared);
 
-        if (distance < 0.1) {
-          // Avoid division by zero or near-zero
-          // Add a small random nudge if nodes are on top of each other
-          final nudge =
-              Offset(_random.nextDouble() - 0.5, _random.nextDouble() - 0.5) *
-              widget.nodeSize *
-              0.1;
-          // Use temporary variables to avoid modifying map during iteration issues potentially
-          final newPos1 = pos1 - nudge;
-          final newPos2 = pos2 + nudge;
-          // Schedule update after loop or handle carefully
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              setState(() {
-                _nodeData[nodeId1]!.position = newPos1;
-                _nodeData[nodeId2]!.position = newPos2;
-              });
-            }
-          });
+        if (distance < 0.01) {
+          // TODO: figure out if this should be handled!
           continue; // Skip force calculation if too close
         }
 
@@ -193,7 +180,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
         }
 
         // attractive force!
-        if (widget.graphData.hasEdge(nodeId1, nodeId2)) {
+        if (widget.graphData.hasEdge(node1, node2)) {
           if (distance < 0.1) {
             continue; // Avoid division by zero or near-zero for direction
           }
@@ -208,19 +195,17 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
 
         final force = direction * forceMagnitude;
         // Apply forces using temporary variables or directly if safe
-        _nodeData[nodeId1]!.force += force;
-        _nodeData[nodeId2]!.force -= force;
+        data1.force += force;
+        data2.force -= force;
       }
 
-      final data = _nodeData[nodeId1]!;
-
-      data.force = _limitMagnitude(data.force, widget.maxForce);
+      data1.force = _limitMagnitude(data1.force, widget.maxForce);
     }
 
     // 4. Update Velocities and Positions (Euler Integration) - O(N)
     double totalVelocityMagnitudeSquared = 0;
 
-    _nodeData.forEach((nodeId, data) {
+    for (var data in _nodeData.values) {
       var force = data.force;
 
       //
@@ -246,7 +231,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
 
       totalVelocityMagnitudeSquared +=
           velocity.distanceSquared; // Sum squared velocities
-    });
+    }
 
     // 5. Check for Settling (Optional)
     // Calculate average velocity magnitude squared

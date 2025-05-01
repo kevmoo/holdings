@@ -19,7 +19,7 @@ class DemoGraph implements GraphData<int>, Listenable {
   DemoGraph({int targetCount = 20}) {
     this.targetCount = targetCount;
     for (var i = 0; i < targetCount; i++) {
-      _map[i] = HashSet<int>();
+      _map[i] = _createEmpty();
     }
 
     if (_edgeStuff) {
@@ -50,6 +50,8 @@ class DemoGraph implements GraphData<int>, Listenable {
   final _notifier = _MyNotifier();
 
   int get size => _map.length;
+
+  Set<int> _createEmpty() => _edgeStuff ? HashSet<int>() : const {};
 
   DemoGraphDeltaOption churn() {
     final edgeCount = edges.length;
@@ -136,7 +138,7 @@ class DemoGraph implements GraphData<int>, Listenable {
     }
     assert(newNode != -1);
 
-    _map[newNode] = HashSet<int>();
+    _map[newNode] = _createEmpty();
 
     //print('added $newNode');
     _notifier._notify();
@@ -152,7 +154,7 @@ class DemoGraph implements GraphData<int>, Listenable {
 
     var removeCount = 0;
     for (var e in _map.values) {
-      if (e.remove(key)) {
+      if (_edgeStuff && e.remove(key)) {
         removeCount++;
       }
     }
@@ -214,10 +216,13 @@ class DemoGraph implements GraphData<int>, Listenable {
   // GraphData bits
   //
   @override
-  Iterable<int> edgesFrom(int node) => _map[node]!;
+  Iterable<int> edgesFrom(int node) => _edgeStuff ? _map[node]! : const [];
 
   @override
   Iterable<int> get nodes => _map.keys;
+
+  @override
+  bool hasNode(int node) => _map.containsKey(node);
 
   //
   // Listenable bits
