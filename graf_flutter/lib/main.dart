@@ -77,10 +77,12 @@ class _FrameSilly extends StatefulWidget {
 
 class _FrameSillyState extends State<_FrameSilly>
     with SingleTickerProviderStateMixin {
+  static const _maxUpdateDelta = Duration(milliseconds: 200);
   late Ticker _ticker;
 
   final _frameTimes = List<int>.generate(60 * 5, (i) => -1, growable: false);
   Duration _lastTick = Duration.zero;
+  Duration _lastBuildRequest = Duration.zero;
   int _frameSum = 0;
   int _index = 0;
   int _count = 0;
@@ -115,10 +117,12 @@ class _FrameSillyState extends State<_FrameSilly>
     _frameSum += delta.inMicroseconds;
 
     _index = (_index + 1) % _frameTimes.length;
+    _fps = Duration.microsecondsPerSecond / (_frameSum / _count);
 
-    setState(() {
-      _fps = Duration.microsecondsPerSecond / (_frameSum / _count);
-    });
+    if (_lastTick - _lastBuildRequest > _maxUpdateDelta) {
+      _lastBuildRequest = _lastTick;
+      setState(() {});
+    }
   }
 
   @override
