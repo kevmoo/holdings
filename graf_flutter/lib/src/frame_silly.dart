@@ -77,12 +77,9 @@ class _FrameSillyState extends State<FrameSilly>
   @override
   Widget build(BuildContext context) => SizedBox(
     width: 100,
-    child: Text(
-      'Size: $targetGraphSize '
-      'Target: $actualGraphSize '
-      'FPS: ${fps.toStringAsFixed(2)}',
-      style: const TextStyle(fontFamily: 'monospace'),
-      textAlign: TextAlign.start,
-    ),
+    child: Text('''
+Size: $targetGraphSize
+Target: $actualGraphSize
+FPS: ${fps.toStringAsFixed(2)}''', textAlign: TextAlign.start),
   );
 }
