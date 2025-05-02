@@ -17,7 +17,7 @@ class FrameSilly extends StatefulWidget {
 
 class _FrameSillyState extends State<FrameSilly>
     with SingleTickerProviderStateMixin {
-  static const _maxUpdateDelta = Duration(seconds: 5);
+  static const _maxUpdateDelta = Duration(milliseconds: 200);
   late Ticker _ticker;
 
   final _frameTimes = Uint32List(60 * 5);
