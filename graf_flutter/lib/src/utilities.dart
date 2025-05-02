@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 // Assumes [position] is relative to a box of [size] where `0,0` is in the
@@ -12,8 +11,8 @@ Offset wallForce({
   required double maxForce,
 }) {
   final value = Offset(
-    wallForceImpl(position.dx, size.width, buffer, maxForce),
-    wallForceImpl(position.dy, size.height, buffer, maxForce),
+    _wallForceImpl(position.dx, size.width, buffer, maxForce),
+    _wallForceImpl(position.dy, size.height, buffer, maxForce),
   );
 
   assert(value.dx <= maxForce);
@@ -30,8 +29,7 @@ Offset limitMagnitude(Offset velocity, double maxMagnitude) {
   return velocity;
 }
 
-@visibleForTesting
-double wallForceImpl(
+double _wallForceImpl(
   double position,
   double size,
   double buffer,
