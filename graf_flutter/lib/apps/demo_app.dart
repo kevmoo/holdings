@@ -43,6 +43,7 @@ class DemoApp extends StatelessWidget {
               springStiffness: 0,
               repulsionConstant: 0,
               damping: 0,
+              nodeWidgetFactory: _createNode,
             ),
           ),
           Row(
@@ -73,3 +74,26 @@ class DemoApp extends StatelessWidget {
     ),
   );
 }
+
+Widget _createNode(_) => const DecoratedBox(
+  child: Padding(padding: EdgeInsets.all(5), child: FlutterLogo(size: 30)),
+  decoration: _circleShadowDecoration,
+);
+
+const _circleShadowDecoration = BoxDecoration(
+  color: Colors.white,
+  shape: BoxShape.circle,
+  border: Border.fromBorderSide(
+    BorderSide(
+      color: Color(0xFF1565C0), // Material.blue 800
+      width: 1.5,
+    ),
+  ),
+  boxShadow: [
+    BoxShadow(
+      color: Color(0x440000000), // Colors.black.withValues(alpha: 0.2),
+      blurRadius: 1,
+      offset: Offset(1, 1),
+    ),
+  ],
+);

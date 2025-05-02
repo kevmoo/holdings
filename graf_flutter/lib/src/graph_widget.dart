@@ -10,6 +10,7 @@ import 'package:graf/graf.dart';
 import 'edge_painter.dart';
 import 'node_data.dart';
 import 'node_flow_delegate.dart';
+import 'node_widget.dart';
 import 'utilities.dart';
 
 // Define in a file like force_directed_graph_view.dart
@@ -26,8 +27,9 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
   final double terminalVelocity;
   final double timeStep; // dt for simulation (can be fixed or use frame delta)
   final double tooFar; // distance at which we should ignore repulsion
+  late final Widget Function(T node) nodeWidgetFactory;
 
-  const ForceDirectedGraphView({
+  ForceDirectedGraphView({
     super.key,
     required this.graphData,
     this.centerForce = 0,
@@ -41,13 +43,19 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
     this.terminalVelocity = 1000,
     this.timeStep = 0.016, // Roughly 1/60 seconds, good starting point
     this.tooFar = 50000, // distance at which we should ignore repulsion
+    Widget Function(T node)? nodeWidgetFactory,
   }) : assert(damping >= 0 && damping <= 1, 'damping must be between 0 and 1'),
        assert(repulsionConstant >= 0, 'repulsionConstant must be non-negative'),
-       assert(springStiffness >= 0, 'springStiffness must be non-negative');
+       assert(springStiffness >= 0, 'springStiffness must be non-negative') {
+    this.nodeWidgetFactory = nodeWidgetFactory ?? _defaultFactory;
+  }
 
   @override
   State<ForceDirectedGraphView<T>> createState() =>
       _ForceDirectedGraphViewState<T>();
+
+  Widget _defaultFactory(T node) =>
+      DefaultNodeWidget(node: node, size: nodeSize);
 }
 
 // Add TickerProviderStateMixin to manage the Ticker
@@ -301,7 +309,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
         children: _nodeData.keys
             .map(
               (node) => GestureDetector(
-                child: FlutterLogo(size: widget.nodeSize),
+                child: widget.nodeWidgetFactory(node),
                 onPanUpdate: (details) {
                   if (mounted) {
                     setState(() {
