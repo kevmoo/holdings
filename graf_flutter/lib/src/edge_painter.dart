@@ -1,5 +1,4 @@
 // edge_painter.dart (Reusing from previous example)
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:graf/graf.dart';
 
@@ -19,20 +18,6 @@ class EdgePainter<T> extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.translate(size.width / 2, size.height / 2);
 
-    if (kDebugMode) {
-      final bounds = _nodePositions.values.fold<Rect>(_infiniteRect, (
-        bounds,
-        pos,
-      ) {
-        final posRect = pos.position & Size.zero;
-        if (bounds.isInfinite) {
-          return posRect;
-        }
-        return bounds.expandToInclude(posRect);
-      });
-      canvas.drawRect(bounds, Paint()..color = Colors.blue.withAlpha(20));
-    }
-
     for (var edge in _graphData.edges) {
       final startPos = _nodePositions[edge.from]?.position;
       final endPos = _nodePositions[edge.to]?.position;
@@ -41,8 +26,6 @@ class EdgePainter<T> extends CustomPainter {
         canvas.drawLine(startPos, endPos, _edgePaint);
       }
     }
-
-    canvas.drawCircle(Offset.zero, 10, _edgePaint);
   }
 
   @override
@@ -51,10 +34,3 @@ class EdgePainter<T> extends CustomPainter {
       // so we're just going with true for now
       true;
 }
-
-const _infiniteRect = Rect.fromLTRB(
-  double.infinity,
-  double.infinity,
-  double.infinity,
-  double.infinity,
-);
