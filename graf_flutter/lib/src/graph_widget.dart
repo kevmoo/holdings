@@ -10,7 +10,6 @@ import 'package:graf/graf.dart';
 import 'edge_painter.dart';
 import 'node_data.dart';
 import 'node_flow_delegate.dart';
-import 'node_widget.dart';
 import 'utilities.dart';
 
 // Define in a file like force_directed_graph_view.dart
@@ -32,7 +31,7 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
     super.key,
     required this.graphData,
     this.centerForce = 0,
-    this.damping = 0.99,
+    this.damping = 0.01,
     this.defaultSpringLength = 10,
     this.maxForce = 1000,
     this.minEnergyThreshold = 0.1, // Stop when avg velocity is low
@@ -42,7 +41,9 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
     this.terminalVelocity = 1000,
     this.timeStep = 0.016, // Roughly 1/60 seconds, good starting point
     this.tooFar = 50000, // distance at which we should ignore repulsion
-  });
+  }) : assert(damping >= 0 && damping <= 1, 'damping must be between 0 and 1'),
+       assert(repulsionConstant >= 0, 'repulsionConstant must be non-negative'),
+       assert(springStiffness >= 0, 'springStiffness must be non-negative');
 
   @override
   State<ForceDirectedGraphView<T>> createState() =>
@@ -105,6 +106,10 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
           _random.nextDouble() * _renderSize.width - _renderSize.width / 2,
           _random.nextDouble() * _renderSize.height - _renderSize.height / 2,
         ),
+        velocity: Offset.fromDirection(
+          _random.nextDouble() * pi * 2,
+          20 + _random.nextDouble() * 10,
+        ),
       );
     }
   }
@@ -152,83 +157,86 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
       final node1 = _nodeList[i];
       final data1 = _nodeData[node1]!;
       final pos1 = data1.position;
+      var force1 = data1.force;
 
-      for (var j = i + 1; j < _nodeList.length; j++) {
-        final node2 = _nodeList[j];
-        final data2 = _nodeData[node2]!;
-        final pos2 = data2.position;
+      if (widget.repulsionConstant > 0 || widget.springStiffness > 0) {
+        for (var j = i + 1; j < _nodeList.length; j++) {
+          final node2 = _nodeList[j];
+          final data2 = _nodeData[node2]!;
+          final pos2 = data2.position;
 
-        final delta = pos2 - pos1; // Vector from pos1 to pos2
-        final distanceSquared = delta.distanceSquared;
-        final distance = sqrt(distanceSquared);
+          final delta = pos2 - pos1; // Vector from pos1 to pos2
+          final distanceSquared = delta.distanceSquared;
+          final distance = sqrt(distanceSquared);
 
-        if (distance < 0.01) {
-          // TODO: figure out if this should be handled!
-          continue; // Skip force calculation if too close
-        }
-
-        // Repulsive force: F = C / distance^2
-        // Normalize delta safely
-        final direction = delta / distance;
-
-        var forceMagnitude = 0.0;
-
-        if (distance < widget.tooFar) {
-          final repulsionMagnitude = widget.repulsionConstant / distanceSquared;
-          forceMagnitude -= repulsionMagnitude;
-        }
-
-        // attractive force!
-        if (widget.graphData.hasEdge(node1, node2)) {
-          if (distance < 0.1) {
-            continue; // Avoid division by zero or near-zero for direction
+          if (distance < 0.01) {
+            // TODO: figure out if this should be handled!
+            continue; // Skip force calculation if too close
           }
 
-          // Attractive force (Hooke's Law): F = k * (distance - L0)
-          final attractionMagnitude =
-              widget.springStiffness * (distance - widget.defaultSpringLength);
-
+          // Repulsive force: F = C / distance^2
           // Normalize delta safely
-          forceMagnitude += attractionMagnitude;
-        }
+          final direction = delta / distance;
 
-        final force = direction * forceMagnitude;
-        // Apply forces using temporary variables or directly if safe
-        data1.force += force;
-        data2.force -= force;
+          var forceMagnitude = 0.0;
+
+          if (distance < widget.tooFar) {
+            final repulsionMagnitude =
+                widget.repulsionConstant / distanceSquared;
+            forceMagnitude -= repulsionMagnitude;
+          }
+
+          // attractive force!
+          if (widget.graphData.hasEdge(node1, node2)) {
+            if (distance < 0.1) {
+              continue; // Avoid division by zero or near-zero for direction
+            }
+
+            // Attractive force (Hooke's Law): F = k * (distance - L0)
+            final attractionMagnitude =
+                widget.springStiffness *
+                (distance - widget.defaultSpringLength);
+
+            // Normalize delta safely
+            forceMagnitude += attractionMagnitude;
+          }
+
+          final pairForce = direction * forceMagnitude;
+          // Apply forces using temporary variables or directly if safe
+          force1 += pairForce;
+          data2.force -= pairForce;
+        }
       }
 
-      data1.force = limitMagnitude(data1.force, widget.maxForce);
+      //
+      // Add a tiny force towards the center
+      //
+      force1 -= pos1 * widget.centerForce;
+
+      //
+      // Wall forces
+      //
+      force1 += wallForce(
+        position: pos1,
+        size: _renderSize,
+        buffer: widget.nodeSize * 2,
+        maxForce: 100,
+      );
+
+      data1.force = limitMagnitude(force1, widget.maxForce);
     }
 
     // 4. Update Velocities and Positions (Euler Integration) - O(N)
     double totalVelocityMagnitudeSquared = 0;
 
     for (var data in _nodeData.values) {
-      var force = data.force;
-
-      //
-      // Add a tiny force towards the center
-      //
-      force -= data.position * widget.centerForce;
-
-      //
-      // Wall forces
-      //
-      force += wallForce(
-        position: data.position,
-        size: _renderSize,
-        buffer: widget.nodeSize * 2,
-        maxForce: 100,
-      );
-
       var velocity = data.velocity; // Get current velocity
 
       // Update velocity: v = v + a * dt
-      velocity = velocity + force * dt;
+      velocity = velocity + data.force * dt;
 
       // Apply damping
-      velocity = velocity * widget.damping;
+      velocity = velocity * (1 - widget.damping);
 
       velocity = limitMagnitude(velocity, widget.terminalVelocity);
 
@@ -293,7 +301,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
         children: _nodeData.keys
             .map(
               (node) => GestureDetector(
-                child: IconWidget(size: widget.nodeSize),
+                child: FlutterLogo(size: widget.nodeSize),
                 onPanUpdate: (details) {
                   if (mounted) {
                     setState(() {
