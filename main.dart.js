@@ -50648,7 +50648,7 @@ s[r]=m
 m=o.w+=m
 o.x=(r+1)%300
 $.a2U=1e6/(m/p)
-if(n-o.r.a>5e6){o.r=a
+if(n-o.r.a>2e5){o.r=a
 o.aL(new A.Xg())}},
 m(){var s=this.d
 s===$&&A.c()
