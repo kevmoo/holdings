@@ -33,6 +33,21 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+<script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+    const searchParams = new URLSearchParams(window.location.search);
+    const forceCanvaskit = searchParams.get('force_canvaskit') === 'true';
+    const userConfig = forceCanvaskit ?
+        {'renderer': 'canvaskit'} :
+        {'wasmAllowList': {
+                'gecko': true,
+                'webkit': true,
+            }
+        };
+    _flutter.loader.load({
+        config: userConfig,
+    });
+</script>
 </body>
 </html>
