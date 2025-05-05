@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart'; // Needed for Ticker and SchedulerBinding
 import 'package:graf/graf.dart';
 
+import 'default_node_widget.dart';
 import 'edge_painter.dart';
 import 'node_data.dart';
 import 'node_flow_delegate.dart';
-import 'node_widget.dart';
 import 'utilities.dart';
 
 // Define in a file like force_directed_graph_view.dart
