@@ -101,6 +101,12 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
 
     _ensureNodeData();
     _isSettled = false;
+
+    // Trigger a repaint to show the updated positions
+    // Only call setState if the widget is still mounted
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _ensureNodeData() {
@@ -276,12 +282,6 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
     }
 
     _notifier.value++;
-
-    // Trigger a repaint to show the updated positions
-    // Only call setState if the widget is still mounted
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   @override
@@ -306,28 +306,34 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
           nodeSize: widget.nodeSize,
         ),
         // Provide the NodeWidgets as direct children
-        children: _nodeData.keys
-            .map(
-              (node) => GestureDetector(
-                child: widget.nodeWidgetFactory(node),
-                onPanUpdate: (details) {
-                  if (mounted) {
-                    setState(() {
-                      final nodeData = _nodeData[node]!;
-                      nodeData.position += details.delta;
-                      // Optionally pause forces on this node while dragging
-                      nodeData.velocity = Offset.zero;
-                      _isSettled = false; // Unsettle if dragged
-                      if (!_ticker.isActive) {
-                        _ticker.start();
-                      }
-                    });
-                  }
-                },
-              ),
-            )
-            .toList(),
+        children: _nodeData.keys.map(_nodeWidget).toList(),
       ),
     ],
   );
+
+  static const _allowDrag = false;
+
+  Widget _nodeWidget(T node) {
+    if (_allowDrag) {
+      return GestureDetector(
+        child: widget.nodeWidgetFactory(node),
+        onPanUpdate: mounted ? (details) => _onPanUpdate(details, node) : null,
+      );
+    }
+    return widget.nodeWidgetFactory(node);
+  }
+
+  void _onPanUpdate(DragUpdateDetails details, T node) {
+    assert(mounted);
+    setState(() {
+      final nodeData = _nodeData[node]!;
+      nodeData.position += details.delta;
+      // Optionally pause forces on this node while dragging
+      nodeData.velocity = Offset.zero;
+      _isSettled = false; // Unsettle if dragged
+      if (!_ticker.isActive) {
+        _ticker.start();
+      }
+    });
+  }
 }
