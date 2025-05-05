@@ -25,7 +25,7 @@ void _onTimer(Timer bob) {
   silly.targetGraphSize = _data.targetCount;
 }
 
-final _data = DemoGraph(targetCount: 400);
+final _data = DemoGraph(targetCount: 750);
 
 class DemoApp extends StatelessWidget {
   const DemoApp({super.key});
