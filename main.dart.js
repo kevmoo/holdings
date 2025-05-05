@@ -51290,7 +51290,7 @@ l(){var s=this.d
 s===$&&A.c()
 s.l()
 this.IF()},
-U(a){return A.a6B(A.agi("Size: "+$.a95+"\nTarget: "+$.a8q+"\nFPS: "+B.c.S($.a36,2),null,null,B.aH),null,100)}}
+U(a){return A.a6B(A.agi("Size: "+$.a8q+"\nTarget: "+$.a95+"\nFPS: "+B.c.S($.a36,2),null,null,B.aH),null,100)}}
 A.Xs.prototype={
 $0(){},
 $S:0}
@@ -57025,7 +57025,7 @@ s($,"aok","abc",()=>A.N6(A.bx([B.fv],t.r)))
 s($,"anC","aaI",()=>A.N6(A.bx([B.fw],t.r)))
 s($,"aod","ab9",()=>A.N6(A.bx([B.fx],t.r)))
 s($,"anH","nO",()=>{var q=new A.oO(A.dv(null,null,null,t.S,A.a6("aG<o>")),new A.DC($.ax()))
-q.IS(750)
+q.IS(518)
 return q})
 s($,"aog","a3D",()=>A.a69(null))
 s($,"anb","aao",()=>A.a69(null))
