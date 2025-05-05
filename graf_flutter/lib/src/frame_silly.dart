@@ -20,7 +20,7 @@ class _FrameSillyState extends State<FrameSilly>
   static const _maxUpdateDelta = Duration(milliseconds: 200);
   late Ticker _ticker;
 
-  final _frameTimes = Uint32List(60 * 5);
+  final _frameTimes = Uint32List(120);
   Duration _lastTick = Duration.zero;
   Duration _lastBuildRequest = Duration.zero;
   int _frameSum = 0;
@@ -78,8 +78,8 @@ class _FrameSillyState extends State<FrameSilly>
   Widget build(BuildContext context) => SizedBox(
     width: 100,
     child: Text('''
-Size: $targetGraphSize
-Target: $actualGraphSize
+Size: $actualGraphSize
+Target: $targetGraphSize
 FPS: ${fps.toStringAsFixed(2)}''', textAlign: TextAlign.start),
   );
 }
