@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:web/web.dart' as web;
 
 import '../src/frame_silly.dart' as silly;
 import '../src/graph_widget.dart';
@@ -10,6 +11,23 @@ void main() {
   runApp(const DemoApp());
 
   Timer.periodic(const Duration(milliseconds: 500), _onTimer);
+}
+
+int _frames() {
+  var frames = 500;
+
+  try {
+    final uri = Uri.parse(web.window.location.href);
+    final framesString = uri.queryParameters['target'];
+    if (framesString != null) {
+      frames = int.parse(framesString);
+    }
+  } catch (e) {
+    print('some error getting frames, sticking with $frames');
+  }
+
+  print('frames! $frames');
+  return frames;
 }
 
 void _onTimer(Timer bob) {
@@ -25,7 +43,7 @@ void _onTimer(Timer bob) {
   silly.targetGraphSize = _data.targetCount;
 }
 
-final _data = DemoGraph(targetCount: 750);
+final _data = DemoGraph(targetCount: _frames());
 
 class DemoApp extends StatelessWidget {
   const DemoApp({super.key});

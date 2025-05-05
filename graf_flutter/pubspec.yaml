@@ -21,6 +21,7 @@ dependencies:
     sdk: flutter
   graf:
     path: ../graf
+  web: any
 
 dev_dependencies:
   flutter_test:
