@@ -22,6 +22,7 @@ int _frames() {
     if (framesString != null) {
       frames = int.parse(framesString);
     }
+    // ignore: avoid_catches_without_on_clauses
   } catch (e) {
     print('some error getting frames, sticking with $frames');
   }
