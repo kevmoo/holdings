@@ -34,7 +34,7 @@ int _frames() {
 void _onTimer(Timer bob) {
   if (silly.fps < 55 && _data.targetCount > 10) {
     _data.targetCount--;
-  } else if (silly.fps > 58 && _data.targetCount < 1000) {
+  } else if (silly.fps > 58 && _data.targetCount < 2000) {
     _data.targetCount++;
   }
 
