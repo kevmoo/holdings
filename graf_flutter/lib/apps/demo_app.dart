@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:web/web.dart' as web;
 
 import '../src/frame_silly.dart' as silly;
 import '../src/graph_widget.dart';
@@ -14,20 +13,18 @@ void main() {
 }
 
 int _frames() {
-  var frames = 500;
+  var frames = 1000;
 
   try {
-    final uri = Uri.parse(web.window.location.href);
-    final framesString = uri.queryParameters['target'];
+    final framesString = Uri.base.queryParameters['target'];
     if (framesString != null) {
-      frames = int.parse(framesString);
+      frames = int.tryParse(framesString) ?? frames;
     }
     // ignore: avoid_catches_without_on_clauses
   } catch (e) {
     print('some error getting frames, sticking with $frames');
   }
 
-  print('frames! $frames');
   return frames;
 }
 
