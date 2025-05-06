@@ -36,18 +36,15 @@
 <script>
     {{flutter_js}}
     {{flutter_build_config}}
+    const userConfig = {'wasmAllowList': {'gecko': true, 'webkit': true}};
     const searchParams = new URLSearchParams(window.location.search);
-    const forceCanvaskit = searchParams.get('force_canvaskit') === 'true';
-    const userConfig = forceCanvaskit ?
-        {'renderer': 'canvaskit'} :
-        {'wasmAllowList': {
-                'gecko': true,
-                'webkit': true,
-            }
-        };
-    _flutter.loader.load({
-        config: userConfig,
-    });
+    if (searchParams.has('js')) {
+        userConfig.renderer = 'canvaskit';
+    }
+    if (searchParams.has('st')) {
+        userConfig.forceSingleThreadedSkwasm = true;
+    }
+    _flutter.loader.load({config: userConfig});
 </script>
 </body>
 </html>
