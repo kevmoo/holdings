@@ -28,11 +28,12 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
   final double timeStep; // dt for simulation (can be fixed or use frame delta)
   final double tooFar; // distance at which we should ignore repulsion
   late final Widget Function(T node) nodeWidgetFactory;
+  final bool allowDrag;
 
   ForceDirectedGraphView({
     super.key,
     required this.graphData,
-    this.centerForce = 0,
+    this.centerForce = 0.01,
     this.damping = 0.01,
     this.defaultSpringLength = 10,
     this.maxForce = 1000,
@@ -43,6 +44,7 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
     this.terminalVelocity = 1000,
     this.timeStep = 0.016, // Roughly 1/60 seconds, good starting point
     this.tooFar = 50000, // distance at which we should ignore repulsion
+    this.allowDrag = false,
     Widget Function(T node)? nodeWidgetFactory,
   }) : assert(damping >= 0 && damping <= 1, 'damping must be between 0 and 1'),
        assert(repulsionConstant >= 0, 'repulsionConstant must be non-negative'),
@@ -291,7 +293,11 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
       // 1. Edge Painter - draws lines between current node positions
       Positioned.fill(
         child: CustomPaint(
-          painter: EdgePainter<T>(widget.graphData, _nodeData),
+          painter: EdgePainter<T>(
+            widget.graphData,
+            _nodeData,
+            repaint: _notifier,
+          ),
           willChange: true,
           // Ensure the painter repaints when positions change
           // isComplex/willChange might be useful if edges are numerous
@@ -311,16 +317,15 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
     ],
   );
 
-  static const _allowDrag = false;
-
   Widget _nodeWidget(T node) {
-    if (_allowDrag) {
-      return GestureDetector(
-        child: widget.nodeWidgetFactory(node),
+    var child = widget.nodeWidgetFactory(node);
+    if (widget.allowDrag) {
+      child = GestureDetector(
+        child: child,
         onPanUpdate: mounted ? (details) => _onPanUpdate(details, node) : null,
       );
     }
-    return widget.nodeWidgetFactory(node);
+    return child;
   }
 
   void _onPanUpdate(DragUpdateDetails details, T node) {

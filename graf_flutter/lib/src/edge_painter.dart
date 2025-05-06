@@ -8,7 +8,7 @@ class EdgePainter<T> extends CustomPainter {
   final GraphData<T> _graphData;
   final Map<T, NodeData> _nodePositions;
 
-  EdgePainter(this._graphData, this._nodePositions);
+  EdgePainter(this._graphData, this._nodePositions, {required super.repaint});
 
   final _edgePaint = Paint()
     ..color = Colors.black.withValues(alpha: 0.6)

@@ -38,7 +38,7 @@ abstract class GraphData<T> {
     return GraphData(map);
   }
 
-  static GraphData<String> tree({int count = 20}) {
+  static GraphData<String> tree({int count = (1 << 6) - 1}) {
     final nodes = List.generate(
       RangeError.checkNotNegative(count, 'count'),
       (i) => 'Node ${i + 1}',

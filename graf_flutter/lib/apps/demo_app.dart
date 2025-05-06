@@ -57,12 +57,13 @@ class DemoApp extends StatelessWidget {
         children: [
           Expanded(
             child: ForceDirectedGraphView<int>(
+              centerForce: 0,
+              damping: 0,
               graphData: _data,
               nodeSize: 40,
-              springStiffness: 0,
-              repulsionConstant: 0,
-              damping: 0,
               nodeWidgetFactory: _createNode,
+              repulsionConstant: 0,
+              springStiffness: 0,
             ),
           ),
           Row(
