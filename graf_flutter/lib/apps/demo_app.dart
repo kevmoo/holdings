@@ -1,47 +1,90 @@
 import 'dart:async';
+import 'dart:collection';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../src/frame_silly.dart' as silly;
 import '../src/graph_widget.dart';
+import '../src/simple_notifier.dart';
+import 'app_utils.dart';
 import 'demo_graph.dart';
+
+final _timings = ListQueue<FrameTiming>();
+
+final _notifier = SimpleNotifier();
 
 void main() {
   runApp(const DemoApp());
 
-  Timer.periodic(const Duration(milliseconds: 500), _onTimer);
+  SchedulerBinding.instance.addTimingsCallback(_onTimings);
+
+  Timer.periodic(const Duration(milliseconds: 200), _onTimer);
 }
 
-int _frames() {
-  var frames = 1000;
+void _onTimings(List<FrameTiming> timings) {
+  _timings.addAll(timings);
+}
+
+final _isMaxMode = Uri.base.queryParameters.containsKey('max');
+
+int _initialCount() {
+  var targetCount = 100;
 
   try {
-    final framesString = Uri.base.queryParameters['target'];
-    if (framesString != null) {
-      frames = int.tryParse(framesString) ?? frames;
+    final targetString = Uri.base.queryParameters['target'];
+    if (targetString != null) {
+      targetCount = int.tryParse(targetString) ?? targetCount;
     }
     // ignore: avoid_catches_without_on_clauses
   } catch (e) {
-    print('some error getting frames, sticking with $frames');
+    print('some error getting frames, sticking with $targetCount');
   }
 
-  return frames;
+  return targetCount;
 }
 
 void _onTimer(Timer bob) {
-  if (silly.fps < 55 && _data.targetCount > 10) {
-    _data.targetCount--;
-  } else if (silly.fps > 58 && _data.targetCount < 2000) {
-    _data.targetCount++;
+  if (_timings.isNotEmpty) {
+    while (_timings.length > 200) {
+      _timings.removeFirst();
+    }
+    final stats = allTheStats(_timings);
+
+    silly.buildTime = stats.buildDuration;
+    silly.rasterTime = stats.rasterDuration;
+    silly.totalSpan = stats.totalSpan;
   }
 
-  _data.churn();
+  final magicNumber = _isMaxMode
+      ? max(silly.rasterTime, silly.buildTime)
+      : silly.totalSpan;
 
-  silly.actualGraphSize = _data.size;
-  silly.targetGraphSize = _data.targetCount;
+  silly.fps = 1 / (magicNumber / 1000);
+
+  if (silly.fps < 55 && _data.size > 20) {
+    _data.removeNode();
+    _data.removeNode();
+    _data.removeNode();
+    _data.removeNode();
+    _data.removeNode();
+  } else if (silly.fps < 60 && _data.targetCount > 10) {
+    _data.removeNode();
+  } else if (silly.fps > 70 && _data.targetCount < 2000) {
+    _data.addNode();
+    _data.addNode();
+    _data.addNode();
+    _data.addNode();
+    _data.addNode();
+  } else if (silly.fps > 65 && _data.targetCount < 2000) {
+    _data.addNode();
+  }
+
+  _notifier.notify();
 }
 
-final _data = DemoGraph(targetCount: _frames());
+final _data = DemoGraph(targetCount: _initialCount());
 
 class DemoApp extends StatelessWidget {
   const DemoApp({super.key});
@@ -55,42 +98,28 @@ class DemoApp extends StatelessWidget {
           Expanded(
             child: ForceDirectedGraphView<int>(
               centerForce: 0,
-              damping: 0,
+              damping: 0.0001,
               graphData: _data,
               nodeSize: 40,
               nodeWidgetFactory: _createNode,
-              repulsionConstant: 0,
+              repulsionConstant: 1000,
               springStiffness: 0,
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              IconButton(
-                onPressed: _data.churn,
-                icon: const Icon(Icons.refresh),
-              ),
-              IconButton(onPressed: _data.addNode, icon: const Icon(Icons.add)),
-              IconButton(
-                onPressed: _data.removeNode,
-                icon: const Icon(Icons.remove),
-              ),
-              IconButton(
-                onPressed: _data.addEdge,
-                icon: const Icon(Icons.link),
-              ),
-              IconButton(
-                onPressed: _data.removeEdge,
-                icon: const Icon(Icons.link_off),
-              ),
-              const silly.FrameSilly(),
-            ],
+          ListenableBuilder(
+            listenable: _notifier,
+            builder: (ctx, child) => Text(_text()),
           ),
         ],
       ),
     ),
   );
 }
+
+String _text() =>
+    '''
+Widget count: ${_data.size}       FPS: ${silly.fps.toStringAsFixed(1)}   Max mode: $_isMaxMode
+Times (ms): build ${silly.buildTime.toStringAsFixed(1)}   raster  ${silly.rasterTime.toStringAsFixed(1)}    total ${silly.totalSpan.toStringAsFixed(1)}''';
 
 Widget _createNode(_) => const DecoratedBox(
   child: Padding(padding: EdgeInsets.all(5), child: FlutterLogo(size: 30)),
