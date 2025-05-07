@@ -44,7 +44,7 @@ class ForceDirectedGraphView<T> extends StatefulWidget {
     this.springStiffness = 0.05,
     this.terminalVelocity = 1000,
     this.timeStep = 0.016, // Roughly 1/60 seconds, good starting point
-    this.tooFar = 50000, // distance at which we should ignore repulsion
+    this.tooFar = double.infinity, // distance at which we ignore repulsion
     this.allowDrag = false,
     Widget Function(T node)? nodeWidgetFactory,
   }) : assert(damping >= 0 && damping <= 1, 'damping must be between 0 and 1'),
