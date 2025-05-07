@@ -19,7 +19,7 @@ const _edgeStuff = false;
 
 class DemoGraph implements GraphData<int>, Listenable {
   DemoGraph({int targetCount = 20}) {
-    this.targetCount = targetCount;
+    _targetCount = targetCount;
     for (var i = 0; i < targetCount; i++) {
       _map[i] = _createEmpty();
     }
@@ -41,7 +41,9 @@ class DemoGraph implements GraphData<int>, Listenable {
   final Map<int, Set<int>> _map = HashMap<int, Set<int>>();
 
   late int _targetCount;
+
   int get targetCount => _targetCount;
+
   set targetCount(int value) {
     if (value < 0) {
       throw ArgumentError.value(value, 'value', 'Cannot be negative');

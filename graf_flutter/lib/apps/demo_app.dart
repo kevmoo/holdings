@@ -20,7 +20,7 @@ void main() {
 
   SchedulerBinding.instance.addTimingsCallback(_onTimings);
 
-  Timer.periodic(const Duration(milliseconds: 200), _onTimer);
+  Timer.periodic(Duration(milliseconds: _isSlow ? 500 : 200), _onTimer);
 }
 
 void _onTimings(List<FrameTiming> timings) {
@@ -28,6 +28,7 @@ void _onTimings(List<FrameTiming> timings) {
 }
 
 final _isMaxMode = Uri.base.queryParameters.containsKey('max');
+final _isSlow = Uri.base.queryParameters.containsKey('slow');
 
 int _initialCount() {
   var targetCount = 100;
@@ -65,19 +66,23 @@ void _onTimer(Timer bob) {
 
   if (silly.fps < 55 && _data.size > 20) {
     _data.removeNode();
+    if (!_isSlow) {
+      _data.removeNode();
+      _data.removeNode();
+      _data.removeNode();
+      _data.removeNode();
+    }
+  } else if (silly.fps < 60 && _data.size > 10) {
     _data.removeNode();
-    _data.removeNode();
-    _data.removeNode();
-    _data.removeNode();
-  } else if (silly.fps < 60 && _data.targetCount > 10) {
-    _data.removeNode();
-  } else if (silly.fps > 70 && _data.targetCount < 2000) {
+  } else if (silly.fps > 70 && _data.size < 2000) {
     _data.addNode();
-    _data.addNode();
-    _data.addNode();
-    _data.addNode();
-    _data.addNode();
-  } else if (silly.fps > 65 && _data.targetCount < 2000) {
+    if (!_isSlow) {
+      _data.addNode();
+      _data.addNode();
+      _data.addNode();
+      _data.addNode();
+    }
+  } else if (silly.fps > 65 && _data.size < 2000) {
     _data.addNode();
   }
 
@@ -118,7 +123,7 @@ class DemoApp extends StatelessWidget {
 
 String _text() =>
     '''
-Widget count: ${_data.size}       FPS: ${silly.fps.toStringAsFixed(1)}   Max mode: $_isMaxMode
+Widget count: ${_data.size}       FPS: ${silly.fps.toStringAsFixed(1)}  ${_isMaxMode ? 'Max' : ''}  ${_isSlow ? 'Slow' : ''}`
 Times (ms): build ${silly.buildTime.toStringAsFixed(1)}   raster  ${silly.rasterTime.toStringAsFixed(1)}    total ${silly.totalSpan.toStringAsFixed(1)}''';
 
 Widget _createNode(_) => const DecoratedBox(
