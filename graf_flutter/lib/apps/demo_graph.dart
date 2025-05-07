@@ -6,6 +6,8 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:graf/graf.dart';
 
+import '../src/simple_notifier.dart';
+
 enum DemoGraphDeltaOption { addNode, removeNode, addEdge, removeEdge }
 
 final _rnd = Random();
@@ -47,7 +49,7 @@ class DemoGraph implements GraphData<int>, Listenable {
     _targetCount = value;
   }
 
-  final _notifier = _MyNotifier();
+  final _notifier = SimpleNotifier();
 
   int get size => _map.length;
 
@@ -141,7 +143,7 @@ class DemoGraph implements GraphData<int>, Listenable {
     _map[newNode] = _createEmpty();
 
     //print('added $newNode');
-    _notifier._notify();
+    _notifier.notify();
   }
 
   void removeNode() {
@@ -162,7 +164,7 @@ class DemoGraph implements GraphData<int>, Listenable {
 
       print('removed $key with $removeCount edges');
     }
-    _notifier._notify();
+    _notifier.notify();
   }
 
   void addEdge() {
@@ -235,9 +237,4 @@ class DemoGraph implements GraphData<int>, Listenable {
   @override
   void removeListener(VoidCallback listener) =>
       _notifier.removeListener(listener);
-}
-
-// Avoiding the lint about calling `notifyListeners` being protected/test only.
-final class _MyNotifier extends ChangeNotifier {
-  void _notify() => notifyListeners();
 }

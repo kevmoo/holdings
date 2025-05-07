@@ -11,6 +11,7 @@ import 'default_node_widget.dart';
 import 'edge_painter.dart';
 import 'node_data.dart';
 import 'node_flow_delegate.dart';
+import 'simple_notifier.dart';
 import 'utilities.dart';
 
 // Define in a file like force_directed_graph_view.dart
@@ -68,7 +69,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
 
   late Ticker _ticker;
   Duration _lastTickTime = Duration.zero;
-  final _notifier = ValueNotifier<int>(0);
+  final _notifier = SimpleNotifier();
 
   final _nodeData = HashMap<T, NodeData>();
   final _nodeList = <T>[];
@@ -283,7 +284,7 @@ class _ForceDirectedGraphViewState<T> extends State<ForceDirectedGraphView<T>>
       );
     }
 
-    _notifier.value++;
+    _notifier.notify();
   }
 
   @override
