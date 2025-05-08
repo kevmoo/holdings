@@ -125,7 +125,7 @@ class DemoApp extends StatelessWidget {
 
 String _text() =>
     '''
-Widget count: ${_data.size}       FPS: ${silly.fps.toStringAsFixed(1)}  ${_isMaxMode ? 'Max' : ''}  ${_isSlow ? 'Slow' : ''}`
+Widget count: ${_data.size}       FPS: ${silly.fps.toStringAsFixed(1)} ${_isSlow ? 'Slow' : ''}`
 Times (ms): build ${silly.buildTime.toStringAsFixed(1)}   raster  ${silly.rasterTime.toStringAsFixed(1)}    total ${silly.totalSpan.toStringAsFixed(1)}''';
 
 Widget _createNode(_) => const DecoratedBox(
