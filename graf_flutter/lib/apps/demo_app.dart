@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -27,7 +27,6 @@ void _onTimings(List<FrameTiming> timings) {
   _timings.addAll(timings);
 }
 
-final _isMaxMode = Uri.base.queryParameters.containsKey('max');
 final _isSlow = Uri.base.queryParameters.containsKey('slow');
 
 int _initialCount() {
@@ -51,18 +50,25 @@ void _onTimer(Timer bob) {
     while (_timings.length > 200) {
       _timings.removeFirst();
     }
+    final mostRecentRasterFinish = _timings.last.timestampInMicroseconds(
+      FramePhase.rasterFinish,
+    );
+    final oneSecondAgo =
+        mostRecentRasterFinish - const Duration(seconds: 1).inMicroseconds;
+    double frameCount = 0;
+    for (final timing in _timings) {
+      if (timing.timestampInMicroseconds(FramePhase.rasterFinish) >
+          oneSecondAgo) {
+        frameCount++;
+      }
+    }
+    silly.fps = frameCount;
     final stats = allTheStats(_timings);
 
     silly.buildTime = stats.buildDuration;
     silly.rasterTime = stats.rasterDuration;
     silly.totalSpan = stats.totalSpan;
   }
-
-  final magicNumber = _isMaxMode
-      ? max(silly.rasterTime, silly.buildTime)
-      : silly.totalSpan;
-
-  silly.fps = 1 / (magicNumber / 1000);
 
   if (silly.fps < 55 && _data.size > 20) {
     _data.removeNode();
@@ -72,9 +78,7 @@ void _onTimer(Timer bob) {
       _data.removeNode();
       _data.removeNode();
     }
-  } else if (silly.fps < 60 && _data.size > 10) {
-    _data.removeNode();
-  } else if (silly.fps > 70 && _data.size < 2000) {
+  } else if (silly.fps > 59 && _data.size < 2000) {
     _data.addNode();
     if (!_isSlow) {
       _data.addNode();
@@ -82,8 +86,6 @@ void _onTimer(Timer bob) {
       _data.addNode();
       _data.addNode();
     }
-  } else if (silly.fps > 65 && _data.size < 2000) {
-    _data.addNode();
   }
 
   _notifier.notify();
