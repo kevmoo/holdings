@@ -1,6 +1,12 @@
 import 'dart:ui';
 
+import 'package:flutter/widgets.dart';
 import 'package:stats/stats.dart';
+
+typedef DemoStuff = ({
+  Widget Function() factory,
+  void Function(double fps, bool isSlow) timerCallback,
+});
 
 ({num buildDuration, num rasterDuration, num overhead, num totalSpan})
 allTheStats(Iterable<FrameTiming> timings) => (

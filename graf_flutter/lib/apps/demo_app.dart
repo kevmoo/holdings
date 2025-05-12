@@ -1,33 +1,8 @@
-import 'dart:async';
-import 'dart:collection';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
-import '../src/frame_silly.dart' as silly;
 import '../src/graph_widget.dart';
-import '../src/simple_notifier.dart';
 import 'app_utils.dart';
 import 'demo_graph.dart';
-
-final _timings = ListQueue<FrameTiming>();
-
-final _notifier = SimpleNotifier();
-
-void main() {
-  runApp(const DemoApp());
-
-  SchedulerBinding.instance.addTimingsCallback(_onTimings);
-
-  Timer.periodic(Duration(milliseconds: _isSlow ? 500 : 200), _onTimer);
-}
-
-void _onTimings(List<FrameTiming> timings) {
-  _timings.addAll(timings);
-}
-
-final _isSlow = Uri.base.queryParameters.containsKey('slow');
 
 int _initialCount() {
   var targetCount = 100;
@@ -45,88 +20,40 @@ int _initialCount() {
   return targetCount;
 }
 
-void _onTimer(Timer bob) {
-  if (_timings.isNotEmpty) {
-    while (_timings.length > 200) {
-      _timings.removeFirst();
-    }
-    final mostRecentRasterFinish = _timings.last.timestampInMicroseconds(
-      FramePhase.rasterFinish,
-    );
-    final oneSecondAgo =
-        mostRecentRasterFinish - const Duration(seconds: 1).inMicroseconds;
-    double frameCount = 0;
-    for (final timing in _timings) {
-      if (timing.timestampInMicroseconds(FramePhase.rasterFinish) >
-          oneSecondAgo) {
-        frameCount++;
-      }
-    }
-    silly.fps = frameCount;
-    final stats = allTheStats(_timings);
-
-    silly.buildTime = stats.buildDuration;
-    silly.rasterTime = stats.rasterDuration;
-    silly.totalSpan = stats.totalSpan;
-  }
-
-  if (silly.fps < 55 && _data.size > 20) {
-    _data.removeNode();
-    if (!_isSlow) {
-      _data.removeNode();
-      _data.removeNode();
-      _data.removeNode();
-      _data.removeNode();
-    }
-  } else if (silly.fps > 59 && _data.size < 2000) {
-    _data.addNode();
-    if (!_isSlow) {
-      _data.addNode();
-      _data.addNode();
-      _data.addNode();
-      _data.addNode();
-    }
-  }
-
-  _notifier.notify();
-}
-
 final _data = DemoGraph(targetCount: _initialCount());
 
-class DemoApp extends StatelessWidget {
-  const DemoApp({super.key});
+final DemoStuff demoStuff = (
+  factory: nodeDemoFactory,
+  timerCallback: (double fps, bool isSlow) {
+    if (fps < 55 && _data.size > 20) {
+      _data.removeNode();
+      if (!isSlow) {
+        _data.removeNode();
+        _data.removeNode();
+        _data.removeNode();
+        _data.removeNode();
+      }
+    } else if (fps > 59 && _data.size < 2000) {
+      _data.addNode();
+      if (!isSlow) {
+        _data.addNode();
+        _data.addNode();
+        _data.addNode();
+        _data.addNode();
+      }
+    }
+  },
+);
 
-  @override
-  Widget build(BuildContext context) => MaterialApp(
-    theme: ThemeData(scaffoldBackgroundColor: Colors.white),
-    home: Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: ForceDirectedGraphView<int>(
-              centerForce: 0,
-              damping: 0.0001,
-              graphData: _data,
-              nodeSize: 40,
-              nodeWidgetFactory: _createNode,
-              repulsionConstant: 1000,
-              springStiffness: 0,
-            ),
-          ),
-          ListenableBuilder(
-            listenable: _notifier,
-            builder: (ctx, child) => Text(_text()),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-String _text() =>
-    '''
-Widget count: ${_data.size}       FPS: ${silly.fps.toStringAsFixed(1)} ${_isSlow ? 'Slow' : ''}`
-Times (ms): build ${silly.buildTime.toStringAsFixed(1)}   raster  ${silly.rasterTime.toStringAsFixed(1)}    total ${silly.totalSpan.toStringAsFixed(1)}''';
+Widget nodeDemoFactory() => ForceDirectedGraphView<int>(
+  centerForce: 0,
+  damping: 0.0001,
+  graphData: _data,
+  nodeSize: 40,
+  nodeWidgetFactory: _createNode,
+  repulsionConstant: 1000,
+  springStiffness: 0,
+);
 
 Widget _createNode(_) => const DecoratedBox(
   child: Padding(padding: EdgeInsets.all(5), child: FlutterLogo(size: 30)),

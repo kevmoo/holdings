@@ -1,5 +1,6 @@
+import 'apps/timer_main.dart' as timer;
 import 'apps/yegor_silly.dart' as demo;
 
 void main() {
-  demo.main();
+  timer.startApp(demoStuff: demo.demoStuff);
 }

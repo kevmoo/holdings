@@ -3,36 +3,29 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'app_utils.dart';
+
 const int _maxDepth = 6;
 final math.Random _random = math.Random(0);
 
-void main() {
-  runApp(YegorApp());
-}
+final DemoStuff demoStuff = (
+  factory: () => const WidgetChurnApp(),
+  timerCallback: (double fps, bool isSlow) {},
+);
 
-class YegorApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) =>
-      const MaterialApp(home: MyHomePage('Flutter Demo Home Page'));
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage(this.title);
-
-  final String title;
+class WidgetChurnApp extends StatefulWidget {
+  const WidgetChurnApp();
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<WidgetChurnApp> createState() => _WidgetChurnAppState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _WidgetChurnAppState extends State<WidgetChurnApp> {
   final _LayoutNode rootNode = _LayoutNode.generate();
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(widget.title)),
-    body: _LayoutWidget(rootNode, key: const ValueKey<String>('root')),
-  );
+  Widget build(BuildContext context) =>
+      _LayoutWidget(rootNode, key: const ValueKey<String>('root'));
 }
 
 class _LayoutWidget extends StatefulWidget {
