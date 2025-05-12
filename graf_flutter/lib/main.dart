@@ -1,4 +1,4 @@
-import 'apps/demo_app.dart' as demo;
+import 'apps/yegor_silly.dart' as demo;
 
 void main() {
   demo.main();
