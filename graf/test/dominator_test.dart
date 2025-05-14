@@ -11,7 +11,7 @@ void main() {
         const entryNode = 'Entry';
 
         final cfg = GraphData(<String, Set<String>>{
-          'Entry': {'A'},
+          entryNode: {'A'},
           'A': {'B', 'C'},
           'B': {'D'},
           'C': {'D'},
@@ -23,38 +23,35 @@ void main() {
         final dominatorFinder = DominatorFinder.compute(cfg, entryNode);
 
         // 3. Assert: Verify dominator sets
-        expect(
-          dominatorFinder.getDominators('Entry'),
-          equals({'Entry'}),
-          reason: 'Dominators of Entry',
-        );
-        expect(
-          dominatorFinder.getDominators('A'),
-          equals({'Entry', 'A'}),
-          reason: 'Dominators of A',
-        );
-        expect(
-          dominatorFinder.getDominators('B'),
-          equals({'Entry', 'A', 'B'}),
-          reason: 'Dominators of B',
-        );
-        expect(
-          dominatorFinder.getDominators('C'),
-          equals({'Entry', 'A', 'C'}),
-          reason: 'Dominators of C',
-        );
+        expect(dominatorFinder.getDominators('Entry'), {
+          'Entry',
+        }, reason: 'Dominators of Entry');
+        expect(dominatorFinder.getDominators('A'), {
+          'Entry',
+          'A',
+        }, reason: 'Dominators of A');
+        expect(dominatorFinder.getDominators('B'), {
+          'Entry',
+          'A',
+          'B',
+        }, reason: 'Dominators of B');
+        expect(dominatorFinder.getDominators('C'), {
+          'Entry',
+          'A',
+          'C',
+        }, reason: 'Dominators of C');
         expect(
           dominatorFinder.getDominators('D'),
           // D is dominated by Entry and A because all paths to D go through them.
           // It's also dominated by itself.
-          equals({'Entry', 'A', 'D'}),
+          {'Entry', 'A', 'D'},
           reason: 'Dominators of D',
         );
         expect(
           dominatorFinder.getDominators('Exit'),
           // Exit is dominated by Entry, A, D because all paths go through them.
           // It's also dominated by itself.
-          equals({'Entry', 'A', 'D', 'Exit'}),
+          {'Entry', 'A', 'D', 'Exit'},
           reason: 'Dominators of Exit',
         );
 
@@ -66,29 +63,27 @@ void main() {
         );
         expect(
           dominatorFinder.getImmediateDominator('A'),
-          equals('Entry'),
+          'Entry',
           reason: 'IDom of A',
         );
         expect(
           dominatorFinder.getImmediateDominator('B'),
-          equals('A'),
+          'A',
           reason: 'IDom of B',
         );
         expect(
           dominatorFinder.getImmediateDominator('C'),
-          equals('A'),
+          'A',
           reason: 'IDom of C',
         );
         expect(
           dominatorFinder.getImmediateDominator('D'),
-          equals(
-            'A',
-          ), // A immediately dominates D because B and C are siblings under A
+          'A', // A immediately dominates D because B and C are siblings under A
           reason: 'IDom of D',
         );
         expect(
           dominatorFinder.getImmediateDominator('Exit'),
-          equals('D'),
+          'D',
           reason: 'IDom of Exit',
         );
       },

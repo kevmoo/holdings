@@ -23,7 +23,7 @@ class DominatorFinder<T> {
       if (node == entryNode) {
         _dominators[node] = {node};
       } else {
-        _dominators[node] = graph.nodes.toSet();
+        _dominators[node] = const {};
       }
     }
 
