@@ -13,14 +13,17 @@ class DefaultNodeWidget<T> extends StatelessWidget {
     width: size,
     height: size,
     decoration: circleShadowDecoration,
-    child: Center(
-      child: Text(
-        node.toString(),
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: size * 0.2, // Adjust font size relative to node size
+    child: Tooltip(
+      message: node.toString(),
+      child: Center(
+        child: Text(
+          node.toString(),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: size * 0.2, // Adjust font size relative to node size
+          ),
+          overflow: TextOverflow.ellipsis, // Prevent text overflow
         ),
-        overflow: TextOverflow.ellipsis, // Prevent text overflow
       ),
     ),
   );
