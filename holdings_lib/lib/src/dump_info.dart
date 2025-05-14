@@ -18,10 +18,7 @@ Map<String, dynamic> loadJson() {
 Future<AllInfo> load() async {
   final codec = JsonToAllInfoConverter();
 
-  // final holdings = jsonContent['holding'] ;
-
   final info = codec.convert(loadJson());
 
-  print(info.version);
   return info;
 }
