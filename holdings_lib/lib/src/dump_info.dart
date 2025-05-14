@@ -6,7 +6,7 @@ import 'package:dart2js_info/json_info_codec.dart';
 
 Map<String, dynamic> loadJson() {
   final file = File(
-    'out/003_fb8c9a3c3f_segment_button_null/main.dart.js.info.json',
+    '/Users/kevmoo/github/kevmoo/holdings/holdings_lib/out/info_vote_may_13.json',
   );
 
   final jsonContent =
