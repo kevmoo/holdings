@@ -5,59 +5,65 @@ import 'dart:collection';
 import 'graph_data.dart';
 import 'graph_extensions.dart';
 
+List<T> _defaultFunc<T>(GraphData<T> graph, T node) =>
+    graph.getPredecessors(node);
+
 class DominatorFinder<T> {
   final GraphData<T> graph;
   final T entryNode;
   final _dominators = HashMap<T, Set<T>>();
   final _immediateDominators = HashMap<T, T?>();
+  final List<T> Function(GraphData<T> graph, T entryNode) _predecessorFunc;
 
-  DominatorFinder._(this.graph, this.entryNode);
+  DominatorFinder._(this.graph, this.entryNode, this._predecessorFunc);
 
-  static DominatorFinder<T> compute<T>(GraphData<T> graph, T entryNode) =>
-      DominatorFinder._(graph, entryNode).._computeDominators();
+  static DominatorFinder<T> compute<T>(
+    GraphData<T> graph,
+    T entryNode, {
+    List<T> Function(GraphData<T> graph, T entryNode)? predecessorsFunction,
+  }) =>
+      DominatorFinder._(graph, entryNode, predecessorsFunction ?? _defaultFunc)
+        .._computeDominators();
 
   /// Computes the dominators and immediate dominators for each node.
   void _computeDominators() {
-    // Initialize dominator sets
-    for (var node in graph.nodes) {
+    final toVisit = ListQueue<T>()..add(entryNode);
+
+    while (toVisit.isNotEmpty) {
+      final node = toVisit.removeFirst();
+
       if (node == entryNode) {
         _dominators[node] = {node};
       } else {
         _dominators[node] = const {};
       }
+
+      toVisit.addAll(
+        graph.edgesFrom(node).where((e) => !_dominators.containsKey(e)),
+      );
     }
 
     // Iteratively compute dominator sets
     var changed = true;
     while (changed) {
       changed = false;
-      for (var node in graph.nodes) {
+      for (var node in _dominators.keys) {
         if (node == entryNode) continue;
 
-        Set<T> predecessorsDominatorsIntersection;
-        final predecessors = graph.getPredecessors(node);
+        final predecessors =
+            _predecessorFunc(
+              graph,
+              node,
+            ).where(_dominators.containsKey).toList();
 
-        if (predecessors.isNotEmpty) {
-          predecessorsDominatorsIntersection = Set.of(
-            _dominators[predecessors.first]!,
-          );
-          for (var i = 1; i < predecessors.length; i++) {
-            predecessorsDominatorsIntersection =
-                predecessorsDominatorsIntersection.intersection(
-                  _dominators[predecessors[i]]!,
-                );
-          }
-        } else {
-          // If a node has no predecessors (and is not the entry),
-          // it's likely unreachable from the entry, or the graph is just that simple.
-          // Its dominator set would ideally be just itself if reachable only from entry,
-          // but in the iterative approach, we rely on predecessor intersections.
-          // For simplicity in this iterative method, we'll treat unreachable nodes'
-          // dominators as the set of all nodes initially, and the intersection
-          // with an empty set of predecessors (if not entry) effectively keeps it large
-          // until predecessors are processed. A more robust approach might involve
-          // a reachability analysis first.
-          predecessorsDominatorsIntersection = graph.nodes.toSet();
+        var predecessorsDominatorsIntersection = Set.of(
+          _dominators[predecessors.first]!,
+        );
+        for (var i = 1; i < predecessors.length; i++) {
+          predecessorsDominatorsIntersection =
+              predecessorsDominatorsIntersection.intersection(
+                _dominators[predecessors[i]]!,
+              );
         }
 
         final newDominators = <T>{node, ...predecessorsDominatorsIntersection};
@@ -71,22 +77,19 @@ class DominatorFinder<T> {
     }
 
     // Compute immediate dominators
+
     _computeImmediateDominators();
   }
 
   /// Computes the immediate dominators from the dominator sets.
   void _computeImmediateDominators() {
-    _immediateDominators[entryNode] =
-        null; // Entry node has no immediate dominator
-
-    for (var node in graph.nodes) {
+    for (var node in _dominators.keys) {
       if (node == entryNode) continue;
 
       final nodeDominators = _dominators[node];
       if (nodeDominators == null || nodeDominators.isEmpty) {
-        // This node might be unreachable from the entry.
-        _immediateDominators[node] = null;
-        continue;
+        // This node is unreachable from the entry.
+        throw StateError('Something is likely wrong with the algorithm');
       }
 
       // The immediate dominator is the dominator that is not
@@ -122,15 +125,24 @@ class DominatorFinder<T> {
           // (excluding the node itself) with the largest dominator set, as it will be highest in the dominator lattice
           // and thus closest to the node in the dominator tree.
 
-          if (_dominators[dominator]!.length > maxDominatorSetSize) {
-            maxDominatorSetSize = _dominators[dominator]!.length;
+          final theLength = _dominators[dominator]!.length;
+          if (theLength > maxDominatorSetSize) {
+            maxDominatorSetSize = theLength;
             immediateDominatorCandidate = dominator;
           }
         }
       }
-      _immediateDominators[node] = immediateDominatorCandidate;
+
+      if (immediateDominatorCandidate != null) {
+        _immediateDominators[node] = immediateDominatorCandidate;
+      }
     }
   }
+
+  /// The size of the graph excluding nodes unreachable from [entryNode].
+  int get size => _dominators.length;
+
+  Iterable<T> get nodes => _dominators.keys;
 
   // Get the dominator set for a node
   Set<T>? getDominators(T node) => _dominators[node];

@@ -17,6 +17,9 @@ void main() {
           'C': {'D'},
           'D': {'Exit'},
           'Exit': {},
+          // This node is not interesting for dominator
+          // Here to test things are not broken!
+          'Island': {'C'},
         });
 
         // 2. Act: Compute dominators
@@ -53,6 +56,13 @@ void main() {
           // It's also dominated by itself.
           {'Entry', 'A', 'D', 'Exit'},
           reason: 'Dominators of Exit',
+        );
+        expect(
+          dominatorFinder.getDominators('Island'),
+          // Exit is dominated by Entry, A, D because all paths go through them.
+          // It's also dominated by itself.
+          null,
+          reason: 'Dominators of Island is null',
         );
 
         // 4. Assert: Verify immediate dominators

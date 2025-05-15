@@ -3,7 +3,7 @@ abstract class GraphData<T> {
   Iterable<T> edgesFrom(T node);
   bool hasNode(T node);
 
-  factory GraphData(Map<T, Set<T>> values) = _GraphData;
+  factory GraphData(Map<T, Iterable<T>> values) = _GraphData;
 }
 
 class _GraphData<T> implements GraphData<T> {
@@ -13,7 +13,7 @@ class _GraphData<T> implements GraphData<T> {
         'All edge target nodes must exist as keys in the input map.',
       );
 
-  final Map<T, Set<T>> _map;
+  final Map<T, Iterable<T>> _map;
 
   @override
   Iterable<T> get nodes => _map.keys;

@@ -4,6 +4,89 @@ import 'package:test/test.dart';
 
 void main() {
   group('GraphDataExtensions', () {
+    group('connectedComponents', () {
+      test('should return a single component for a fully connected graph', () {
+        // Graph: A <-> B <-> C <-> A
+        final map = <String, Set<String>>{
+          'A': {'B', 'C'},
+          'B': {'A', 'C'},
+          'C': {'A', 'B'},
+        };
+        final graph = GraphData(map);
+        final components = graph.connectedComponents();
+        expect(components.first, unorderedEquals(['A', 'B', 'C']));
+      });
+
+      test('should return multiple components for a disconnected graph', () {
+        // Graph: A <-> B, C <-> D
+        final map = <String, Set<String>>{
+          'A': {'B'},
+          'B': {'A'},
+          'C': {'D'},
+          'D': {'C'},
+        };
+        final graph = GraphData(map);
+        final components = graph.connectedComponents();
+        expect(
+          components,
+          unorderedEquals([
+            ['A', 'B'],
+            ['C', 'D'],
+          ]),
+        );
+      });
+
+      test('should handle isolated nodes as separate components', () {
+        // Graph: A, B, C (all isolated)
+        final map = <String, Set<String>>{'A': {}, 'B': {}, 'C': {}};
+        final graph = GraphData(map);
+        final components = graph.connectedComponents();
+        expect(
+          components,
+          unorderedEquals([
+            ['A'],
+            ['B'],
+            ['C'],
+          ]),
+        );
+      });
+
+      test('should work with a mix of connected and isolated nodes', () {
+        // Graph: A <-> B, C (isolated)
+        final map = <String, Set<String>>{
+          'A': {'B'},
+          'B': {'A'},
+          'C': {},
+        };
+        final graph = GraphData(map);
+        final components = graph.connectedComponents();
+        expect(
+          components,
+          unorderedEquals([
+            ['A', 'B'],
+            ['C'],
+          ]),
+        );
+      });
+
+      test('should handle pyramids', () {
+        // Graph: A <-> B, C (isolated)
+        final map = <String, Set<String>>{
+          'A': {'B'},
+          'C': {'B'},
+          'B': {},
+        };
+        final graph = GraphData(map);
+        final components = graph.connectedComponents();
+
+        expect(
+          components,
+          unorderedEquals([
+            ['A', 'B', 'C'],
+          ]),
+        );
+      });
+    });
     // --- New tests for hasEdge ---
     group('hasEdge', () {
       test('should return true if edge exists from -> to', () {
