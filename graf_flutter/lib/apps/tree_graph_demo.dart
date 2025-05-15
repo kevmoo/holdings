@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:graf/graf.dart';
+import 'package:graf/example_graphs.dart' as example_graphs;
 
 import '../src/graph_widget.dart';
 
@@ -7,7 +7,7 @@ void main() {
   runApp(const TreeGraphDemoApp());
 }
 
-final _data = GraphData.tree();
+final _data = example_graphs.tree();
 
 class TreeGraphDemoApp extends StatelessWidget {
   const TreeGraphDemoApp({super.key});
