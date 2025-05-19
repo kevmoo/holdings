@@ -11,15 +11,19 @@ class DumpInfoGraph implements GraphData<Info> {
 
   final AllInfo info;
 
-  final _nodeCache = HashSet<Info>.identity();
+  final _nodeCache = <Info>[];
+  final _edgeCache = HashMap<Info, List<Info>>();
 
   @override
-  Iterable<Info> edgesFrom(Info node) {
+  Iterable<Info> edgesFrom(Info node) =>
+      _edgeCache.putIfAbsent(node, () => _edgesFrom(node));
+
+  List<Info> _edgesFrom(Info node) {
     if (node is CodeInfo) {
-      return node.uses.map((e) => e.target);
+      return node.uses.map((e) => e.target).toList(growable: false);
     }
 
-    return const Iterable.empty();
+    return const [];
   }
 
   @override

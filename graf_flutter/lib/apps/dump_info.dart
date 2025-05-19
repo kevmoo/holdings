@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:graphs/graphs.dart';
 import 'package:holdings_lib/holdings_lib.dart' as di;
+// ignore: implementation_imports
+import 'package:holdings_lib/src/sample_files.dart';
 
 import '../src/graph_view.dart';
 import '../src/graph_widget.dart';
 
 Future<void> main() async {
-  final info = await di.load();
+  final info = await di.load(counterInfo);
 
-  _data = GraphView(
-    data: di.DumpInfoGraph(info: info),
-    initialVisible: [info.program!.entrypoint],
+  final graph = di.DumpInfoGraph(info: info);
+
+  final connectedComponents = stronglyConnectedComponents(
+    graph.nodes,
+    graph.edgesFrom,
   );
+
+  final bigBits = connectedComponents
+      .where((cc) => cc.length > 30 && cc.length < 50)
+      .toList();
+
+  _data = GraphView(data: graph, initialVisible: bigBits[2]);
 
   runApp(const TimerApp());
 }

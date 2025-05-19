@@ -4,10 +4,8 @@ import 'dart:io';
 import 'package:dart2js_info/info.dart';
 import 'package:dart2js_info/json_info_codec.dart';
 
-Map<String, dynamic> loadJson() {
-  final file = File(
-    '/Users/kevmoo/github/kevmoo/holdings/holdings_lib/out/info_vote_may_13.json',
-  );
+Map<String, dynamic> loadJson(String path) {
+  final file = File(path);
 
   final jsonContent =
       jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
@@ -15,10 +13,10 @@ Map<String, dynamic> loadJson() {
   return jsonContent;
 }
 
-Future<AllInfo> load() async {
+Future<AllInfo> load(String path) async {
   final codec = JsonToAllInfoConverter();
 
-  final info = codec.convert(loadJson());
+  final info = codec.convert(loadJson(path));
 
   return info;
 }

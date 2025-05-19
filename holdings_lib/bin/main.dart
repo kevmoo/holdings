@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:holdings_lib/src/dump_info.dart';
 import 'package:holdings_lib/src/neo4j.dart';
+import 'package:holdings_lib/src/sample_files.dart';
 import 'package:holdings_lib/src/shared.dart';
 
 const _kinds = {'function', 'field'};
@@ -20,7 +21,7 @@ TypedId _parse(String iddKey) {
 }
 
 Future<void> main(List<String> args) async {
-  final info = loadJson();
+  final info = loadJson(voteInfo);
 
   final program = info['program'] as JsonMap;
 
