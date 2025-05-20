@@ -21,6 +21,7 @@ dependencies:
     sdk: flutter
   graf:
     path: ../graf
+  graphs: ^2.3.2
   holdings_lib:
     path: ../holdings_lib
   stats: ^2.1.0
