@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:graphs/graphs.dart';
+import 'package:graf/graf.dart';
 import 'package:holdings_lib/holdings_lib.dart' as di;
 // ignore: implementation_imports
 import 'package:holdings_lib/src/sample_files.dart';
@@ -9,21 +9,49 @@ import 'package:holdings_lib/src/sample_files.dart';
 import '../src/graph_view.dart';
 import '../src/graph_widget.dart';
 
+final _expando = Expando<List<di.Info>>('predecessors');
+
+List<di.Info> _cachingPredecessorFunc(GraphData<di.Info> graph, di.Info node) =>
+    _expando[node] ??= graph.getPredecessors(node);
+
 Future<void> main() async {
   final info = await di.load(counterInfo);
 
   final graph = di.DumpInfoGraph(info: info);
 
-  final connectedComponents = stronglyConnectedComponents(
-    graph.nodes,
-    graph.edgesFrom,
+  final dominatorFinder = DominatorFinder.compute(
+    graph,
+    info.program!.entrypoint,
+    predecessorsFunction: _cachingPredecessorFunc,
   );
 
-  final bigBits = connectedComponents
-      .where((cc) => cc.length > 30 && cc.length < 50)
-      .toList();
+  final immediateFun = HashMap<di.Info, HashSet<di.Info>>.identity();
 
-  final data = GraphView(data: graph, initialVisible: bigBits[2]);
+  for (var node in graph.nodes) {
+    final immediate = dominatorFinder.getImmediateDominator(node);
+
+    if (immediate == null) {
+      continue;
+    }
+
+    immediateFun.putIfAbsent(immediate, HashSet.new).add(node);
+  }
+
+  final toStringBits = {
+    for (var entry in immediateFun.entries)
+      MapEntry(entry.key, entry.value.toList(growable: false)): entry.value
+          .fold(0, (size, info) => size + info.size),
+  };
+
+  final sortedEntries = toStringBits.entries.toList()
+    ..sort((a, b) => -a.value.compareTo(b.value));
+
+  final biggest = sortedEntries.first;
+
+  final data = GraphView<di.Info>(
+    data: graph,
+    initialVisible: [biggest.key.key, ...biggest.key.value],
+  );
 
   runApp(_DumpInfoApp(data));
 }

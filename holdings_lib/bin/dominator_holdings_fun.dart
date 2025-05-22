@@ -37,50 +37,31 @@ Future<void> main() async {
 
   print('ugh - starting slow stuff');
 
-  final bob = DominatorFinder.compute(
+  final dominatorFinder = DominatorFinder.compute(
     graph,
     info.program!.entrypoint,
     predecessorsFunction: _cachingPredecessorFunc,
   );
 
-  print('Dominator size: ${bob.size}');
+  print('Dominator size: ${dominatorFinder.size}');
 
-  final weird = <Info>[];
-  final notZero = <CodeInfo>[];
+  final immediateFun = HashMap<Info, HashSet<Info>>.identity();
 
   for (var node in graph.nodes) {
-    if (bob.getDominators(node) == null) {
-      weird.add(node);
-      if (node is CodeInfo) {
-        if (node.size > 0) {
-          notZero.add(node);
-        }
-      }
+    final immediate = dominatorFinder.getImmediateDominator(node);
+
+    if (immediate == null) {
+      continue;
     }
+
+    immediateFun.putIfAbsent(immediate, HashSet.new).add(node);
   }
 
-  print('items that have no dominator');
-  print(weird.length);
-  print('items with no dominator that are non-empty');
-  print(notZero.length);
+  final toStringBits = immediateFun.entries
+      .where((me) => me.key.name == 'toString')
+      .toList();
 
-  final visited = <Info>[];
+  toStringBits.sort((a, b) => -a.value.length.compareTo(b.value.length));
 
-  final toVisit = ListQueue<Info>()..add(notZero.first);
-  while (toVisit.isNotEmpty) {
-    final node = toVisit.removeFirst();
-    visited.add(node);
-    final preds = graph.getPredecessors(node);
-    print(visited.length);
-    print(visited);
-    toVisit.addAll(preds.where((pred) => !visited.contains(pred)));
-  }
-
-  final result = shortestPath(
-    info.program!.entrypoint,
-    weird.last,
-    graph.edgesFrom,
-  );
-
-  print(result?.toList());
+  print(toStringBits);
 }
