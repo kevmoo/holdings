@@ -5,7 +5,7 @@ import 'package:stats/stats.dart';
 
 typedef DemoStuff = ({
   Widget Function() factory,
-  void Function(double fps, bool isSlow) timerCallback,
+  int? Function(double fps, bool isSlow) timerCallback,
 });
 
 ({num buildDuration, num rasterDuration, num overhead, num totalSpan})

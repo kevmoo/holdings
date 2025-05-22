@@ -8,7 +8,6 @@ import 'package:flutter/scheduler.dart';
 import '../src/frame_silly.dart' as silly;
 import '../src/simple_notifier.dart';
 import 'app_utils.dart';
-import 'demo_graph.dart';
 
 final _timings = ListQueue<FrameTiming>();
 
@@ -44,7 +43,7 @@ void startApp({required DemoStuff demoStuff}) {
       silly.totalSpan = stats.totalSpan;
     }
 
-    demoStuff.timerCallback(silly.fps, _isSlow);
+    _counter = demoStuff.timerCallback(silly.fps, _isSlow);
 
     _notifier.notify();
   }
@@ -52,29 +51,13 @@ void startApp({required DemoStuff demoStuff}) {
   Timer.periodic(Duration(milliseconds: _isSlow ? 500 : 200), onTimer);
 }
 
+int? _counter;
+
 void _onTimings(List<FrameTiming> timings) {
   _timings.addAll(timings);
 }
 
 final _isSlow = Uri.base.queryParameters.containsKey('slow');
-
-int _initialCount() {
-  var targetCount = 100;
-
-  try {
-    final targetString = Uri.base.queryParameters['target'];
-    if (targetString != null) {
-      targetCount = int.tryParse(targetString) ?? targetCount;
-    }
-    // ignore: avoid_catches_without_on_clauses
-  } catch (e) {
-    print('some error getting frames, sticking with $targetCount');
-  }
-
-  return targetCount;
-}
-
-final _data = DemoGraph(targetCount: _initialCount());
 
 class TimerApp extends StatelessWidget {
   const TimerApp({required this.factory, super.key});
@@ -100,5 +83,5 @@ class TimerApp extends StatelessWidget {
 
 String _text() =>
     '''
-Widget count: ${_data.size}       FPS: ${silly.fps.toStringAsFixed(1)} ${_isSlow ? 'Slow' : ''}
+${_counter == null ? '' : 'Counter: $_counter'}       FPS: ${silly.fps.toStringAsFixed(1)} ${_isSlow ? 'Slow' : ''}
 Times (ms): build ${silly.buildTime.toStringAsFixed(1)}   raster  ${silly.rasterTime.toStringAsFixed(1)}    total ${silly.totalSpan.toStringAsFixed(1)}''';

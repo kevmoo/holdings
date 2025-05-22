@@ -10,7 +10,7 @@ final math.Random _random = math.Random(0);
 
 final DemoStuff demoStuff = (
   factory: () => const WidgetChurnApp(),
-  timerCallback: (double fps, bool isSlow) {},
+  timerCallback: (double fps, bool isSlow) => null,
 );
 
 class WidgetChurnApp extends StatefulWidget {

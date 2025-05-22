@@ -42,6 +42,7 @@ final DemoStuff demoStuff = (
         _data.addNode();
       }
     }
+    return _data.size;
   },
 );
 
