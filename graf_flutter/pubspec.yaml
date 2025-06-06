@@ -24,7 +24,7 @@ dependencies:
   graphs: ^2.3.2
   holdings_lib:
     path: ../holdings_lib
-  stats: ^2.1.0
+  stats: ^3.0.0
 
 dev_dependencies:
   flutter_test:
