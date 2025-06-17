@@ -61,13 +61,8 @@ class _LayoutWidgetState extends State<_LayoutWidget>
           ..repeat();
   }
 
-  static Widget _buildChild(ValueKey<int> key, final _Node child) {
-    if (child is _LayoutNode) {
-      return _LayoutWidget(child, key: key);
-    } else {
-      return _LeafWidget(child as _LeafNode, key: key);
-    }
-  }
+  static Widget _buildChild(ValueKey<int> key, final _Node child) =>
+      child._create(key);
 
   @override
   Widget build(BuildContext context) {
@@ -129,10 +124,14 @@ enum _WidgetKind {
   appBar,
 }
 
-abstract class _Node {}
+sealed class _Node {
+  const _Node();
 
-class _LayoutNode extends _Node {
-  _LayoutNode({
+  Widget _create(Key key);
+}
+
+final class _LayoutNode extends _Node {
+  const _LayoutNode({
     required this.isColumn,
     required this.firstChild,
     required this.secondChild,
@@ -151,9 +150,12 @@ class _LayoutNode extends _Node {
   final bool isColumn;
   final _Node firstChild;
   final _Node secondChild;
+
+  @override
+  Widget _create(Key key) => _LayoutWidget(this, key: key);
 }
 
-class _LeafNode extends _Node {
+final class _LeafNode extends _Node {
   _LeafNode({required this.kind});
 
   factory _LeafNode.generate() => _LeafNode(
@@ -161,4 +163,7 @@ class _LeafNode extends _Node {
   );
 
   final _WidgetKind kind;
+
+  @override
+  Widget _create(Key key) => _LeafWidget(this, key: key);
 }
