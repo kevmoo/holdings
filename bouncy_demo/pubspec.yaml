@@ -1,0 +1,12 @@
+name: bouncy_demo
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+resolution: workspace
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fps_host:
+    path: ../fps_host

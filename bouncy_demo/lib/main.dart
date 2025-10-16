@@ -1,6 +1,6 @@
 import 'package:fps_host/fps_host.dart' as timer;
 
-import 'apps/demo_app.dart' as demo;
+import 'src/widget_churn.dart' as demo;
 
 void main() {
   timer.startApp(demoStuff: demo.demoStuff);
