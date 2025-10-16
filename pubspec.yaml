@@ -4,6 +4,7 @@ environment:
   sdk: ^3.8.0
 
 workspace:
+  - fps_host
   - graf
   - graf_flutter
   - holdings_lib

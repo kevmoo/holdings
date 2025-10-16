@@ -5,13 +5,13 @@ import 'dart:math'; // Needed for sqrt, pow, Random
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart'; // Needed for Ticker and SchedulerBinding
+import 'package:fps_host/fps_host.dart';
 import 'package:graf/graf.dart';
 
 import 'default_node_widget.dart';
 import 'edge_painter.dart';
 import 'node_data.dart';
 import 'node_flow_delegate.dart';
-import 'simple_notifier.dart';
 import 'utilities.dart';
 
 // Define in a file like force_directed_graph_view.dart

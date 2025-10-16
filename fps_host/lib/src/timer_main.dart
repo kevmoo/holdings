@@ -5,9 +5,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../src/frame_silly.dart' as silly;
-import '../src/simple_notifier.dart';
 import 'app_utils.dart';
+import 'frame_silly.dart' as silly;
+import 'simple_notifier.dart';
 
 final _timings = ListQueue<FrameTiming>();
 

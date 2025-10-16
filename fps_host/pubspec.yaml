@@ -1,0 +1,11 @@
+name: fps_host
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+resolution: workspace
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  stats: ^3.0.0

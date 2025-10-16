@@ -1,4 +1,5 @@
-import 'apps/timer_main.dart' as timer;
+import 'package:fps_host/fps_host.dart' as timer;
+
 import 'apps/yegor_silly.dart' as demo;
 
 void main() {

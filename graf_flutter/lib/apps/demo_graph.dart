@@ -4,9 +4,8 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
+import 'package:fps_host/fps_host.dart';
 import 'package:graf/graf.dart';
-
-import '../src/simple_notifier.dart';
 
 enum DemoGraphDeltaOption { addNode, removeNode, addEdge, removeEdge }
 

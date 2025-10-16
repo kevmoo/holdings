@@ -19,6 +19,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  fps_host:
+    path: ../fps_host
   graf:
     path: ../graf
   graphs: ^2.3.2

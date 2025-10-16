@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fps_host/fps_host.dart';
 
 import '../src/graph_widget.dart';
-import 'app_utils.dart';
 import 'demo_graph.dart';
 
 int _initialCount() {

@@ -2,8 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import 'app_utils.dart';
+import 'package:fps_host/fps_host.dart';
 
 const int _maxDepth = 6;
 final math.Random _random = math.Random(0);
