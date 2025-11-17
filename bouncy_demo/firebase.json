@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "predeploy": "flutter build web --wasm --source-maps --pwa-strategy none --dump-info",
+    "predeploy": "flutter build web --wasm --source-maps --dump-info",
     "site": "bouncing",
     "public": "build/web",
     "ignore": [
