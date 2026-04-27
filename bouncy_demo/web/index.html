@@ -24,10 +24,12 @@
     {{flutter_build_config}}
     const userConfig = {'wasmAllowList': {'gecko': true, 'webkit': true}};
     const searchParams = new URLSearchParams(window.location.search);
-    if (searchParams.has('js')) {
+    const mode = searchParams.get('mode');
+    if (mode === 'canvaskit') {
         userConfig.renderer = 'canvaskit';
-    }
-    if (searchParams.has('st')) {
+    } else if (mode === 'wimp') {
+        userConfig.enableWimp = true;
+    } else if (mode === 'skwasm-st') {
         userConfig.forceSingleThreadedSkwasm = true;
     }
     _flutter.loader.load({config: userConfig});

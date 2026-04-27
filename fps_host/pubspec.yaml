@@ -9,3 +9,4 @@ dependencies:
   flutter:
     sdk: flutter
   stats: ^3.0.0
+  web: ^1.1.1
