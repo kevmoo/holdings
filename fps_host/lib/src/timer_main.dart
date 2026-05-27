@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:web/web.dart' as web;
 
 import 'app_utils.dart';
@@ -20,6 +21,12 @@ external JSAny? get skwasmInstance;
 final _timings = ListQueue<FrameTiming>();
 
 final _notifier = SimpleNotifier();
+
+const _version = FlutterVersion.version;
+const _channel = FlutterVersion.channel;
+const _flutterVersion = _version != null && _channel != null
+    ? 'Flutter $_version • $_channel'
+    : _version ?? _channel ?? '';
 
 void startApp({required DemoStuff demoStuff}) {
   runApp(TimerApp(factory: demoStuff.factory));
@@ -160,9 +167,33 @@ class TimerApp extends StatelessWidget {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: ListenableBuilder(
-                      listenable: _notifier,
-                      builder: (ctx, child) => Text(_text()),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListenableBuilder(
+                          listenable: _notifier,
+                          builder: (ctx, child) => Text(
+                            _text(),
+                            style: const TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        if (_flutterVersion.isNotEmpty)
+                          const Flexible(
+                            child: Text(
+                              'Built with: $_flutterVersion',
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
