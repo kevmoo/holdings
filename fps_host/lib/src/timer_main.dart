@@ -82,7 +82,13 @@ class TimerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentMode = Uri.base.queryParameters['mode'];
-    const validModes = ['canvaskit', 'skwasm', 'skwasm-st', 'wimp'];
+    const validModes = [
+      'canvaskit',
+      'skwasm',
+      'skwasm-st',
+      'wimp',
+      'webparagraph',
+    ];
     final selectedMode = validModes.contains(currentMode) ? currentMode : null;
 
     // Detect fallback
@@ -149,6 +155,10 @@ class TimerApp extends StatelessWidget {
                               ? 'Wimp (Wasm) (Fallback !!)'
                               : 'Wimp (Wasm)',
                         ),
+                      ),
+                      const DropdownMenuItem(
+                        value: 'webparagraph',
+                        child: Text('WebParagraph (JS)'),
                       ),
                     ],
                     onChanged: (newMode) {

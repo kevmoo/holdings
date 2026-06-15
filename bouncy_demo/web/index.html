@@ -31,6 +31,12 @@
         userConfig.enableWimp = true;
     } else if (mode === 'skwasm-st') {
         userConfig.forceSingleThreadedSkwasm = true;
+    } else if (mode === 'webparagraph') {
+        userConfig.renderer = 'canvaskit';
+        userConfig.preferWebParagraph = true;
+    }
+    if (searchParams.get('webparagraph') === 'true') {
+        userConfig.preferWebParagraph = true;
     }
     _flutter.loader.load({config: userConfig});
 </script>
