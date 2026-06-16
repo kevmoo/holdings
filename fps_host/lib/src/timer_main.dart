@@ -74,6 +74,14 @@ void _onTimings(List<FrameTiming> timings) {
 
 final _isSlow = Uri.base.queryParameters.containsKey('slow');
 
+const _validModes = {
+  'canvaskit',
+  'skwasm',
+  'skwasm-st',
+  'wimp',
+  'webparagraph',
+};
+
 class TimerApp extends StatelessWidget {
   const TimerApp({required this.factory, super.key});
 
@@ -82,18 +90,20 @@ class TimerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentMode = Uri.base.queryParameters['mode'];
-    const validModes = [
-      'canvaskit',
-      'skwasm',
-      'skwasm-st',
-      'wimp',
-      'webparagraph',
-    ];
-    final selectedMode = validModes.contains(currentMode) ? currentMode : null;
 
     // Detect fallback
     final isCanvasKit = flutterCanvasKit != null;
     final isSkwasm = skwasmInstance != null;
+
+    final detectedDefault = isSkwasm
+        ? 'skwasm'
+        : isCanvasKit
+        ? 'canvaskit'
+        : 'canvaskit';
+    final effectiveMode = currentMode ?? detectedDefault;
+    final selectedMode = _validModes.contains(effectiveMode)
+        ? effectiveMode
+        : detectedDefault;
 
     var isFallback = false;
     if (currentMode == 'skwasm' ||
@@ -119,15 +129,6 @@ class TimerApp extends StatelessWidget {
                     value: selectedMode,
                     icon: const Text(' ▼'),
                     items: [
-                      DropdownMenuItem(
-                        child: Text(
-                          'Default (${isCanvasKit
-                              ? 'CanvasKit'
-                              : isSkwasm
-                              ? 'Skwasm'
-                              : 'Unknown'})',
-                        ),
-                      ),
                       const DropdownMenuItem(
                         value: 'canvaskit',
                         child: Text('CanvasKit (JS)'),
@@ -166,9 +167,9 @@ class TimerApp extends StatelessWidget {
                       final params = Map<String, String>.from(
                         uri.queryParameters,
                       );
-                      if (newMode == null) {
+                      if (newMode == detectedDefault) {
                         params.remove('mode');
-                      } else {
+                      } else if (newMode != null) {
                         params['mode'] = newMode;
                       }
                       final newUri = uri.replace(queryParameters: params);
