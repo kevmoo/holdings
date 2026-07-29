@@ -60,7 +60,7 @@ class _LayoutWidgetState extends State<_LayoutWidget>
           ..repeat();
   }
 
-  static Widget _buildChild(ValueKey<int> key, final _Node child) =>
+  static Widget _buildChild(ValueKey<int> key, _Node child) =>
       child._create(key);
 
   @override
